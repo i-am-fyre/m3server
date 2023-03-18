@@ -3,7 +3,7 @@
 ################################################################################
 
 [MangosdConf]
-ConfVersion=2022031900
+ConfVersion=2023031800
 
 ################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -1787,6 +1787,17 @@ Currency.ResetWeekDay                 = 3
 Currency.ResetHour                    = 6
 Currency.ConquestPointsDefaultWeekCap = 135000
 Currency.ConquestPointsArenaReward    = 12000
+
+###################################################################################################
+# QUEST TRACKER
+#    QuestTracker.Enable
+#        Description: Store data in the database about quest completion and abandonment to help find bugged quests.
+#        Default:     0  - (Disabled)
+#                     1  - (Enabled)
+#
+###################################################################################################
+
+QuestTracker.Enable= 0
 
 ###################################################################################################
 # WARDEN SETTINGS
