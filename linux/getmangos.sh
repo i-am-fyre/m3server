@@ -59,7 +59,7 @@
   {
     P_TOOLS="0"
 
-    P_ELUNA="1"
+    P_ELUNA="0"
     P_SD3="1"
     P_BOTS="0"
     P_SOAP="0"
