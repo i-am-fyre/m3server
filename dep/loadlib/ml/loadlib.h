@@ -1,5 +1,8 @@
 /**
- * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2025 MaNGOS <http://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef LOAD_LIB_H
@@ -98,33 +104,76 @@ union u_map_fcc
     uint32 fcc;
 };
 
-//
-// File version chunk
-//
+/**
+ * @brief File version chunk
+ *
+ */
 struct file_MVER
 {
+    /**
+     * @brief
+     *
+     */
     union
     {
-        uint32 fcc;
-        char   fcc_txt[4];
+        uint32 fcc; /**< TODO */
+        char   fcc_txt[4]; /**< TODO */
     };
-    uint32 size;
-    uint32 ver;
+    uint32 size; /**< TODO */
+    uint32 ver; /**< TODO */
 };
 
+/**
+ * @brief
+ *
+ */
 class FileLoader
 {
-        uint8*  data;
-        uint32  data_size;
+        uint8*  data; /**< TODO */
+        uint32  data_size; /**< TODO */
     public:
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         virtual bool prepareLoadedData();
+        /**
+         * @brief
+         *
+         * @return uint8
+         */
         uint8* GetData()     {return data;}
+        /**
+         * @brief
+         *
+         * @return uint32
+         */
         uint32 GetDataSize() {return data_size;}
 
-        file_MVER* version;
+        file_MVER* version; /**< TODO */
+        /**
+         * @brief
+         *
+         */
         FileLoader();
+        /**
+         * @brief
+         *
+         */
         ~FileLoader();
+        /**
+         * @brief
+         *
+         * @param filename
+         * @param log
+         * @return bool
+         */
         bool loadFile(char* filename, bool log = true);
+        /**
+         * @brief
+         *
+         */
         virtual void free();
 };
 

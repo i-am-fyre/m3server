@@ -259,7 +259,9 @@ bool FileLoader::loadFile(char* filename, bool log)
     if (!OpenNewestFile(filename, &fileHandle))
     {
         if (log)
+        {
             printf("No such file %s\n", filename);
+        }
         return false;
     }
 
@@ -275,7 +277,9 @@ bool FileLoader::loadFile(char* filename, bool log)
     if (!SFileReadFile(fileHandle, data, data_size, NULL, NULL))
     {
         if (log)
+        {
             printf("Can't read file %s\n", filename);
+        }
         SFileCloseFile(fileHandle);
         return false;
     }
@@ -298,15 +302,22 @@ bool FileLoader::prepareLoadedData()
     // Check version
     version = (file_MVER*) data;
     if (version->fcc != 'MVER')
+    {
         return false;
+    }
     if (version->ver != FILE_FORMAT_VERSION)
+    {
         return false;
+    }
     return true;
 }
 
 void FileLoader::free()
 {
-    if (data) delete[] data;
+    if (data)
+    {
+        delete[] data;
+    }
     data = 0;
     data_size = 0;
     version = 0;
