@@ -311,10 +311,10 @@ void showBanner(const std::string& sTitle, int iCoreNumber)
 void showWebsiteBanner()
 {
     printf(
-        "  ________________________________________________\n\n"
-        "    For help and support please visit:            \n"
+        "  ____________________________________________________\n\n"
+        "    For help and support please visit:                \n"
         "    Website / Forum / Wiki: https://www.getmangos.eu  \n"
-        "  ________________________________________________\n"
+        "  ____________________________________________________\n"
         );
 }
 

@@ -26,8 +26,15 @@
 #include <stdlib.h>
 #include <iostream>
 #include <sstream>
-// The following is a temp fix until the extractor is merged with the unified extractor
-#include "../loadlib/sl/loadlib.h"
+#include "sl/loadlib.h"
+
+/// all of the updates for this version of WoW
+uint32 const Builds[] = {16016, 16048, 16057, 16309, 16357, 16516, 16650, 16844, 16965, 17116, 17266, 17325, 17345, 17538, 17645, 17688, 17898, 18273};
+static uint32 CONF_TargetBuild = 18273; /// last actual update file under the Data folder
+
+static char* const Locales[] = {"enGB", "enUS", "deDE", "esES", "frFR", "koKR", "zhCN", "zhTW", "enCN", "enTW", "esMX", "ruRU", "itIT"};
+#define LOCALES_COUNT 13
+
 
 FILE* openWoWExe();
 int getBuildNumber();
@@ -42,20 +49,14 @@ bool ClientFileExists(const char* sFileName);
 bool isTransportMap(int mapID);
 bool shouldSkipMap(int mapID, bool m_skipContinents, bool m_skipJunkMaps, bool m_skipBattlegrounds);
 
-uint32 const Builds[] = { 13164, 13205, 13287, 13329, 13596, 13623, 13914, 14007, 14333, 14480, 14545, 15005, 15050, 15211, 15354, 15595, 0 };
-static uint32 CONF_TargetBuild = 15595;              // 4.3.4.15595
-
-static char const* Locales[] = { "enGB", "enUS", "deDE", "esES", "frFR", "koKR", "zhCN", "zhTW", "enCN", "enTW", "esMX", "ruRU" };
-#define LOCALES_COUNT 12
-
 /// Enumerated Core Numbers
 enum CoreNumber
 {
     CLIENT_CLASSIC = 0,
-    CLIENT_TBC = 1,
-    CLIENT_WOTLK = 2,
-    CLIENT_CATA = 3,
-    CLIENT_MOP = 4,
-    CLIENT_WOD = 5,
-    CLIENT_LEGION = 6
+    CLIENT_TBC     = 1,
+    CLIENT_WOTLK   = 2,
+    CLIENT_CATA    = 3,
+    CLIENT_MOP     = 4,
+    CLIENT_WOD     = 5,
+    CLIENT_LEGION  = 6
 };

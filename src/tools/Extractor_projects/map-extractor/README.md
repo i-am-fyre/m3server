@@ -5,7 +5,7 @@ The *map extractor* will extract map information from the game client.
 Requirements
 ------------
 You will need a working installation of the [World of Warcraft][1] client patched
-to version 4.3.4.
+to version 5.4.8.
 
 Instructions - Linux
 --------------------
