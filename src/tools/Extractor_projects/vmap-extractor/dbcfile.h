@@ -110,7 +110,7 @@ public:
         float getFloat(size_t field) const
         {
             assert(field < file._fieldCount);
-            return *reinterpret_cast<float*>(offset + field * 4);
+            return *reinterpret_cast<float*>(offset + (field * 4));
         }
         /**
          * @brief
@@ -121,7 +121,7 @@ public:
         unsigned int getUInt(size_t field) const
         {
             assert(field < file._fieldCount);
-            return *reinterpret_cast<unsigned int*>(offset + field * 4);
+            return *reinterpret_cast<unsigned int*>(offset + (field * 4));
         }
         /**
          * @brief
@@ -132,7 +132,7 @@ public:
         int getInt(size_t field) const
         {
             assert(field < file._fieldCount);
-            return *reinterpret_cast<int*>(offset + field * 4);
+            return *reinterpret_cast<int*>(offset + (field * 4));
         }
 
         /**

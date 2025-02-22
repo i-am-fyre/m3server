@@ -55,8 +55,19 @@ extern const char* szRawVMAPMagic;                          // vmap magic string
  * @return bool
  */
 bool FileExists(const char* file);
+/**
+ * @brief
+ *
+ * @param str
+ */
 void strToLower(char* str);
 
+/**
+ * @brief
+ *
+ * @param fname
+ * @return bool
+ */
 bool ExtractSingleWmo(std::string& fname);
 
 /* @param origPath = original path of the model, cleaned with fixnamen and fixname2
@@ -65,6 +76,10 @@ bool ExtractSingleWmo(std::string& fname);
  */
 bool ExtractSingleModel(std::string& origPath, std::string& fixedName, StringSet& failedPaths);
 
+/**
+ * @brief
+ *
+ */
 void ExtractGameobjectModels();
 
 #endif

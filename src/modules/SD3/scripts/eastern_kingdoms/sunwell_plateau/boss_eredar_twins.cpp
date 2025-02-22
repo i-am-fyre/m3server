@@ -215,11 +215,11 @@ struct boss_alythess : public CreatureScript
                 return;
             }
 
-//#if defined(MISTS)
-//            if (pSpell->GetSchoolMask() == SPELL_SCHOOL_MASK_FIRE)
-//#else
+#if defined(MISTS)
+            if (pSpell->GetSchoolMask() == SPELL_SCHOOL_MASK_FIRE)
+#else
             if (pSpell->SchoolMask == SPELL_SCHOOL_MASK_FIRE)
-//#endif
+#endif
             {
                 if (pTarget->HasAura(SPELL_DARK_TOUCHED))
                 {
@@ -231,11 +231,11 @@ struct boss_alythess : public CreatureScript
                     pTarget->CastSpell(pTarget, SPELL_FLAME_TOUCHED, true);
                 }
             }
-//#if defined(MISTS)
-//            else if (pSpell->GetSchoolMask() == SPELL_SCHOOL_MASK_SHADOW)
-//#else
+#if defined(MISTS)
+            else if (pSpell->GetSchoolMask() == SPELL_SCHOOL_MASK_SHADOW)
+#else
             else if (pSpell->SchoolMask == SPELL_SCHOOL_MASK_SHADOW)
-//#endif
+#endif
             {
                 if (pTarget->HasAura(SPELL_FLAME_TOUCHED))
                 {
@@ -446,11 +446,11 @@ struct boss_sacrolash : public CreatureScript
                 return;
             }
 
-//#if defined(MISTS)
-//            if (pSpell->GetSchoolMask() == SPELL_SCHOOL_MASK_FIRE)
-//#else
+#if defined(MISTS)
+            if (pSpell->GetSchoolMask() == SPELL_SCHOOL_MASK_FIRE)
+#else
             if (pSpell->SchoolMask == SPELL_SCHOOL_MASK_FIRE)
-//#endif
+#endif
             {
                 if (pTarget->HasAura(SPELL_DARK_TOUCHED))
                 {
@@ -462,11 +462,11 @@ struct boss_sacrolash : public CreatureScript
                     pTarget->CastSpell(pTarget, SPELL_FLAME_TOUCHED, true);
                 }
             }
-//#if defined(MISTS)
-//            else if (pSpell->GetSchoolMask() == SPELL_SCHOOL_MASK_SHADOW)
-//#else
+#if defined(MISTS)
+            else if (pSpell->GetSchoolMask() == SPELL_SCHOOL_MASK_SHADOW)
+#else
             else if (pSpell->SchoolMask == SPELL_SCHOOL_MASK_SHADOW)
-//#endif
+#endif
             {
                 if (pTarget->HasAura(SPELL_FLAME_TOUCHED))
                 {

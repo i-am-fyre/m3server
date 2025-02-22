@@ -29,6 +29,10 @@
 
 #pragma pack(push,1)
 
+/**
+ * @brief
+ *
+ */
 struct ModelHeader
 {
     char id[4]; /**< TODO */

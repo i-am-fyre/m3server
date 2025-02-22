@@ -395,6 +395,7 @@ enum UnitMods
     UNIT_MOD_ECLIPSE,
     UNIT_MOD_HOLY_POWER,
     UNIT_MOD_ALTERNATIVE,
+    UNIT_MOD_CHI,
     UNIT_MOD_ARMOR,                                         // UNIT_MOD_ARMOR..UNIT_MOD_RESISTANCE_ARCANE must be in existing order, it's accessed by index values of SpellSchools enum.
     UNIT_MOD_RESISTANCE_HOLY,
     UNIT_MOD_RESISTANCE_FIRE,
@@ -414,7 +415,7 @@ enum UnitMods
     UNIT_MOD_RESISTANCE_START = UNIT_MOD_ARMOR,
     UNIT_MOD_RESISTANCE_END = UNIT_MOD_RESISTANCE_ARCANE + 1,
     UNIT_MOD_POWER_START = UNIT_MOD_MANA,
-    UNIT_MOD_POWER_END = UNIT_MOD_ALTERNATIVE + 1
+    UNIT_MOD_POWER_END = UNIT_MOD_CHI + 1
 };
 
 enum BaseModGroup
@@ -845,6 +846,10 @@ class MovementInfo
         JumpInfo jump;
         // spline
         float    splineElevation;
+        // unknown array
+        std::list<uint32> unkArray;
+        // unknown int32
+        int32 unkInt32;
         // status info
         StatusInfo si;
         int8 byteParam;

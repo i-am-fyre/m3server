@@ -296,7 +296,7 @@ namespace MMAP
         sprintf(tileString, "[%02u,%02u]: ", tileY, tileX);
         printf("%sWriting debug output...                       \r", tileString);
 
-        sprintf(objFileName, "meshes/%03u.map", mapID);
+        sprintf(objFileName, "meshes/%04u.map", mapID);
 
         objFile = fopen(objFileName, "wb");
         if (!objFile)

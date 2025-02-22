@@ -117,7 +117,7 @@ namespace MMAP
                 count++;
             }
 
-            sprintf(filter, "%03u*", mapID);
+            sprintf(filter, "%04u*", mapID);
             files.clear();
             getDirContents(files, "maps", filter);
             for (uint32 i = 0; i < files.size(); ++i)
@@ -180,7 +180,7 @@ namespace MMAP
     /**************************************************************************/
     void MapBuilder::buildMap(uint32 mapID)
     {
-        printf("Building map %03u:\n", mapID);
+        printf("Building map %04u:\n", mapID);
 
         set<uint32>* tiles = getTileList(mapID);
 
@@ -234,10 +234,11 @@ namespace MMAP
 
         printf("Complete!                               \n\n");
     }
+
     /**************************************************************************/
     void MapBuilder::buildTile(uint32 mapID, uint32 tileX, uint32 tileY, dtNavMesh* navMesh)
     {
-        printf("Building map %03u, tile [%02u,%02u]\n", mapID, tileX, tileY);
+        printf("Building map %04u, tile [%02u,%02u]\n", mapID, tileX, tileY);
 
         MeshData meshData;
 
@@ -728,6 +729,7 @@ namespace MMAP
                 continue;
             }
 
+            printf("%s Building navmesh tile...                \r", tileString);
             if (!dtCreateNavMeshData(&params, &navData, &navDataSize))
             {
                 printf(" Failed building navmesh tile - %s           \n", tileString);
@@ -735,6 +737,7 @@ namespace MMAP
             }
 
             dtTileRef tileRef = 0;
+            printf("%s Adding tile to navmesh...                \r", tileString);
             // DT_TILE_FREE_DATA tells detour to unallocate memory when the tile
             // is removed via removeTile()
             dtStatus dtResult = navMesh->addTile(navData, navDataSize, DT_TILE_FREE_DATA, 0, &tileRef);
@@ -756,6 +759,8 @@ namespace MMAP
                 navMesh->removeTile(tileRef, NULL, NULL);
                 continue;
             }
+
+            printf("%s Writing to file...                      \r", tileString);
 
             // write header
             MmapTileHeader header;
@@ -814,10 +819,11 @@ namespace MMAP
         if (m_skipContinents)
             switch (mapID)
             {
-                case 0:        // Eastern Kingdoms
-                case 1:        // Kalimdor
-                case 530:    // Outland
-                case 571:    // Northrend
+                case 0:     // Eastern Kingdoms
+                case 1:     // Kalimdor
+                case 530:   // Outland
+                case 571:   // Northrend
+				case 870:	// Pandaria
                     return true;
                 default:
                     break;
@@ -837,6 +843,12 @@ namespace MMAP
                 case 605:   // development_nonweighted.wdt
                 case 606:   // QA_DVD.wdt
                 case 627:   // unused.wdt
+				case 930:	// (UNUSED) Scenario: Alcaz Island
+				case 995:	// The Depths [UNUSED]
+				case 1014:  // (UNUSED) Peak of Serenity Scenario
+				case 1028:  // (UNUSED) Scenario: Mogu Ruins
+				case 1029:  // (UNUSED) Scenario: Mogu Crypt
+				case 1049:  // (UNUSED) Scenario: Black Ox Temple
                     return true;
                 default:
                     if (isTransportMap(mapID))
@@ -861,6 +873,10 @@ namespace MMAP
                 case 728:   // BfG
                 case 761:   // BfG2
                 case 968:   // EotS2
+				case 998:	// VOP
+				case 1010:  // CTF3
+				case 1101:  // DOTA
+				case 1105:  // GR
                     return true;
                 default:
                     break;
@@ -921,6 +937,11 @@ namespace MMAP
             case 765:    // Krazzworks Attack Zeppelin
             case 766:    // Transport: Gilneas Moving Gunship 02
             case 767:    // Transport: Gilneas Moving Gunship 03
+			case 1113:   // Transport: DarkmoonCarousel
+			case 1132: 	 // Transport218599 - The Skybag (Brawl'gar Arena)
+			case 1133:	 // Transport218600 - Zandalari Ship (Mogu Island)
+			case 1172:   // Transport: Siege of Orgrimmar (Alliance)
+			case 1173:   // Transport: Siege of Orgrimmar (Horde)
                 return true;
             default: // no transport maps
                 return false;

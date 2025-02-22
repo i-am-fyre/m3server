@@ -46,7 +46,12 @@ class WMOInstance;
 class WMOManager;
 class MPQFile;
 
-/* for whatever reason a certain company just can't stick to one coordinate system... */
+/**
+ * @brief for whatever reason a certain company just can't stick to one coordinate system...
+ *
+ * @param v
+ * @return Vec3D
+ */
 static inline Vec3D fixCoords(const Vec3D& v) { return Vec3D(v.z, v.x, v.y); }
 
 /**
@@ -88,7 +93,7 @@ class WMORoot
         bool ConvertToVMAPRootWmo(FILE* output);
     private:
         std::string filename; /**< TODO */
-        char outfilename;
+        char outfilename; /**< TODO */
 };
 
 /**
@@ -177,7 +182,7 @@ class WMOGroup
 
     private:
         std::string filename; /**< TODO */
-        char outfilename;
+        char outfilename; /**< TODO */
 };
 
 /**
