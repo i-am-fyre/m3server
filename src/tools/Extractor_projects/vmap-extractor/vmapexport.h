@@ -45,8 +45,8 @@ enum ModelFlags
     MOD_HAS_BOUND = 1 << 2
 };
 
-extern const char* szWorkDirWmo;
-extern const char* szRawVMAPMagic;                          // vmap magic string for extracted raw vmap data
+extern char const szWorkDirWmo[]; /**< TODO */
+//extern const char* szRawVMAPMagic; /**< vmap magic string for extracted raw vmap data */
 
 /**
  * @brief Test if the specified file exists in the building directory
@@ -55,31 +55,21 @@ extern const char* szRawVMAPMagic;                          // vmap magic string
  * @return bool
  */
 bool FileExists(const char* file);
-/**
- * @brief
- *
- * @param str
- */
-void strToLower(char* str);
 
 /**
- * @brief
+ * @brief Get "uniform" name for a path (a uniform name has the format <md5hash>-<filename>.<ext>)
  *
- * @param fname
- * @return bool
+ * @param path
+ * @return string
  */
-bool ExtractSingleWmo(std::string& fname);
-
-/* @param origPath = original path of the model, cleaned with fixnamen and fixname2
- * @param fixedName = will store the translated name (if changed)
- * @param failedPaths = Set to collect errors
- */
-bool ExtractSingleModel(std::string& origPath, std::string& fixedName, StringSet& failedPaths);
+std::string GetUniformName(std::string& path);
 
 /**
- * @brief
+ * @brief Get extension for a file
  *
+ * @param file
+ * @return extension, if found, or empty string if not
  */
-void ExtractGameobjectModels();
+std::string GetExtension(std::string& file);
 
 #endif

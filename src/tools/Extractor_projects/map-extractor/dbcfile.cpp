@@ -23,8 +23,9 @@
  */
 
 #include "dbcfile.h"
-// The following is a temp fix until the extractor is merged with the unified extractor
-#include "../loadlib/sl/loadlib.h"
+#undef min
+#undef max
+#include <mpq.h>
 
 #include <cstdio>
 
@@ -32,6 +33,7 @@ DBCFile::DBCFile(const std::string& filename):
     filename(filename),
     data(0)
 {
+
 }
 
 DBCFile::DBCFile(HANDLE file) : fileHandle(file), data(0)

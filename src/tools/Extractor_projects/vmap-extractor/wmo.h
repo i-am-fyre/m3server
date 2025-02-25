@@ -31,7 +31,8 @@
 #include <string>
 #include <set>
 #include "vec3d.h"
-#include "mpqfile.h"
+#include <mpq.h>
+#include <loadlib.h>
 
 // MOPY flags
 #define WMO_MATERIAL_NOCAMCOLLIDE    0x01
@@ -41,18 +42,6 @@
 #define WMO_MATERIAL_RENDER          0x10
 #define WMO_MATERIAL_COLLIDE_HIT     0x20
 #define WMO_MATERIAL_WALL_SURFACE    0x40
-
-class WMOInstance;
-class WMOManager;
-class MPQFile;
-
-/**
- * @brief for whatever reason a certain company just can't stick to one coordinate system...
- *
- * @param v
- * @return Vec3D
- */
-static inline Vec3D fixCoords(const Vec3D& v) { return Vec3D(v.z, v.x, v.y); }
 
 /**
  * @brief
@@ -90,10 +79,9 @@ class WMORoot
          * @param output
          * @return bool
          */
-        bool ConvertToVMAPRootWmo(FILE* output);
+        bool ConvertToVMAPRootWmo(FILE* output, const void *szRawVMAPMagic);
     private:
         std::string filename; /**< TODO */
-        char outfilename; /**< TODO */
 };
 
 /**
@@ -178,11 +166,10 @@ class WMOGroup
          * @param pPreciseVectorData
          * @return int
          */
-        int ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPreciseVectorData);
+        int ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPreciseVectorData, int iCoreNumber);
 
     private:
         std::string filename; /**< TODO */
-        char outfilename; /**< TODO */
 };
 
 /**
@@ -212,7 +199,7 @@ class WMOInstance
          * @param tileY
          * @param pDirfile
          */
-        WMOInstance(MPQFile& f, const char* WmoInstName, uint32 mapID, uint32 tileX, uint32 tileY, FILE* pDirfile);
+        WMOInstance(MPQFile& f, std::string& WmoInstName, uint32 mapID, uint32 tileX, uint32 tileY, FILE* pDirfile);
 
         /**
          * @brief
@@ -220,5 +207,21 @@ class WMOInstance
          */
         static void reset();
 };
+
+/**
+ * @brief
+ *
+ * @param fname
+ * @return bool
+ */
+bool ExtractSingleWmo(std::string& fname, int iCoreNumber, const void *szRawVMAPMagic);
+
+/**
+ * @brief
+ *
+ * @param
+ * @return bool
+ */
+bool ExtractWmo(int iCoreNumber, const void *szRawVMAPMagic);
 
 #endif

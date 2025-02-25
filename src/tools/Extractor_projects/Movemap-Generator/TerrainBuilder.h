@@ -76,7 +76,6 @@ namespace MMAP
     // see following files:
     // src/tools/map-extractor/system.cpp
     // src/game/GridMap.cpp
-    static char const* MAP_VERSION_MAGIC = "p1.4";
     /**
      * @brief
      *
@@ -125,7 +124,7 @@ namespace MMAP
              * @param tileY
              * @param meshData
              */
-            void loadMap(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData);
+            void loadMap(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData, char const* MAP_VERSION_MAGIC);
             /**
              * @brief
              *
@@ -207,7 +206,7 @@ namespace MMAP
              * @param portion
              * @return bool
              */
-            bool loadMap(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData, Spot portion);
+            bool loadMap(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData, Spot portion, char const* MAP_VERSION_MAGIC);
 
             /**
              * @brief Sets loop variables for selecting only certain parts of a map's terrain

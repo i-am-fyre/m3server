@@ -26,24 +26,25 @@
 #include <stdlib.h>
 #include <iostream>
 #include <sstream>
-#include "sl/loadlib.h"
+#include "loadlib.h"
+#include <vector>
 
 /// all of the updates for this version of WoW
 uint32 const Builds[] = {16016, 16048, 16057, 16309, 16357, 16516, 16650, 16844, 16965, 17116, 17266, 17325, 17345, 17538, 17645, 17688, 17898, 18273};
 static uint32 CONF_TargetBuild = 18273; /// last actual update file under the Data folder
 
-static char* const Locales[] = {"enGB", "enUS", "deDE", "esES", "frFR", "koKR", "zhCN", "zhTW", "enCN", "enTW", "esMX", "ruRU", "itIT"};
-#define LOCALES_COUNT 13
-
-
-FILE* openWoWExe();
-int getBuildNumber();
+static char const* Locales[] = { "enGB", "enUS", "deDE", "esES", "frFR", "koKR", "zhCN", "zhTW", "enCN", "enTW", "esMX", "ruRU", "itIT" };
+constexpr auto LOCALES_COUNT = 13;
+FILE* openWoWExe(char const* path = NULL);
+int getBuildNumber(char const* path = NULL);
 int getCoreNumber();
 int getCoreNumberFromBuild(int iBuildNumber);
+std::vector<std::string> getMPQListForCore(int coreNumber);
 void showBanner(const std::string& title, int iCoreNumber);
 void showWebsiteBanner();
 void setMapMagicVersion(int iCoreNumber, char* magic);
 void setVMapMagicVersion(int iCoreNumber, char* magic);
+void setMMapMagicVersion(int iCoreNumber, char* magic);
 bool CreateDir(const std::string& sPath);
 bool ClientFileExists(const char* sFileName);
 bool isTransportMap(int mapID);
@@ -60,3 +61,7 @@ enum CoreNumber
     CLIENT_WOD     = 5,
     CLIENT_LEGION  = 6
 };
+
+//std::vector<std::string> getMPQListForCore(int client);
+//
+//

@@ -1,5 +1,11 @@
-## Extractor Projects
+## Unified Extractor Projects
 
-This repo is based on unified Extractors for MaNGOS but with changes to make mangosThree work.
+The submodule contains the unified Extractors for MaNGOS.
 
-Eventually this will be merged back into the Unified Extractors
+This initially Supports:-
+
+* MaNGOS Zero
+
+* MaNGOS One
+
+* MaNGOS Two
