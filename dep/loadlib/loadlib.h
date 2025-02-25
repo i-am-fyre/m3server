@@ -126,14 +126,13 @@ class FileLoader
         file_MVER* version;
         FileLoader();
         ~FileLoader();
-        bool loadFile(char* filename, bool log = true);
-        bool loadFileFromDisk(const char* filename, bool log = true);
+        bool FileLoader::loadFile(char* filename, bool log = true);
+        bool FileLoader::loadFileFromDisk(const char* filename, bool log = true);
         virtual void free();
 };
 
 /**************************************
     Required for MoP data extraction
-    ================================
  **************************************/
 class FileChunk
 {
@@ -157,11 +156,12 @@ public:
     uint8 *GetData()     {return data;}
     uint32 GetDataSize() {return data_size;}
 
+    file_MVER* version;
     ChunkedFile();
     virtual ~ChunkedFile();
     bool prepareLoadedData();
-    //bool FileLoader::loadFile(HANDLE mpq, char *filename, bool log = true);
-    //bool FileLoader::loadFileFromDisk(const char* filename, bool log = true);
+    bool ChunkedFile::loadFile(HANDLE mpq, char *filename, bool log = true);
+    bool ChunkedFile::loadFileFromDisk(const char* filename, bool log = true);
     void free();
 
     void parseChunks();

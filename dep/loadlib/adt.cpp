@@ -49,6 +49,8 @@ bool isHole(int holes, int i, int j)
 ADT_file::ADT_file()
 {
     a_grid = 0;
+    memset(cells, 0, sizeof(cells)); // Initialize cells to zero
+
 }
 
 ADT_file::~ADT_file()

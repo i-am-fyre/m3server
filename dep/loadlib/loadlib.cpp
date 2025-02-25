@@ -10,6 +10,7 @@ ChunkedFile::ChunkedFile()
 {
     data = 0;
     data_size = 0;
+    version = 0;
 }
 
 ChunkedFile::~ChunkedFile()
@@ -17,82 +18,82 @@ ChunkedFile::~ChunkedFile()
     free();
 }
 
-//bool ChunkedFile::loadFile(HANDLE mpq, char* filename, bool log)
-//{
-//    free();
-//    HANDLE file;
-//    if (!SFileOpenFileEx(mpq, filename, SFILE_OPEN_FROM_MPQ, &file))
-//    {
-//        if (log)
-//            printf("No such file %s\n", filename);
-//        return false;
-//    }
-//
-//    data_size = SFileGetFileSize(file, NULL);
-//    data = new uint8[data_size];
-//    SFileReadFile(file, data, data_size, NULL/*bytesRead*/, NULL);
-//    parseChunks();
-//    if (prepareLoadedData())
-//    {
-//        SFileCloseFile(file);
-//        return true;
-//    }
-//
-//    printf("Error loading %s\n", filename);
-//    SFileCloseFile(file);
-//    free();
-//    return false;
-//}
-//
-//bool ChunkedFile::loadFileFromDisk(const char* filename, bool log)
-//{
-//    free();
-//
-//    FILE* file = fopen(filename, "rb");
-//    if (!file)
-//    {
-//        if (log)
-//        {
-//            printf("No such file %s\n", filename);
-//        }
-//        return false;
-//    }
-//
-//    fseek(file, 0, SEEK_END);
-//    data_size = ftell(file);
-//    fseek(file, 0, SEEK_SET);
-//
-//    data = new uint8[data_size];
-//    if (!data)
-//    {
-//        std::cerr << "Not enough memory for file " << filename << std::endl;
-//        fclose(file);
-//        return false;
-//    }
-//
-//    if (fread(data, 1, data_size, file) != data_size)
-//    {
-//        if (log)
-//        {
-//            printf("Can't read file %s\n", filename);
-//        }
-//        fclose(file);
-//        return false;
-//    }
-//
-//    fclose(file);
-//
-//    if (!prepareLoadedData())
-//    {
-//        if (log)
-//        {
-//            printf("Error loading %s\n", filename);
-//        }
-//        return false;
-//    }
-//
-//    return true;
-//}
+bool ChunkedFile::loadFile(HANDLE mpq, char* filename, bool log)
+{
+    free();
+    HANDLE file;
+    if (!SFileOpenFileEx(mpq, filename, SFILE_OPEN_FROM_MPQ, &file))
+    {
+        if (log)
+            printf("No such file %s\n", filename);
+        return false;
+    }
+
+    data_size = SFileGetFileSize(file, NULL);
+    data = new uint8[data_size];
+    SFileReadFile(file, data, data_size, NULL/*bytesRead*/, NULL);
+    parseChunks();
+    if (prepareLoadedData())
+    {
+        SFileCloseFile(file);
+        return true;
+    }
+
+    printf("Error loading %s\n", filename);
+    SFileCloseFile(file);
+    free();
+    return false;
+}
+
+bool ChunkedFile::loadFileFromDisk(const char* filename, bool log)
+{
+    free();
+
+    FILE* file = fopen(filename, "rb");
+    if (!file)
+    {
+        if (log)
+        {
+            printf("No such file %s\n", filename);
+        }
+        return false;
+    }
+
+    fseek(file, 0, SEEK_END);
+    data_size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    data = new uint8[data_size];
+    if (!data)
+    {
+        std::cerr << "Not enough memory for file " << filename << std::endl;
+        fclose(file);
+        return false;
+    }
+
+    if (fread(data, 1, data_size, file) != data_size)
+    {
+        if (log)
+        {
+            printf("Can't read file %s\n", filename);
+        }
+        fclose(file);
+        return false;
+    }
+
+    fclose(file);
+
+    if (!prepareLoadedData())
+    {
+        if (log)
+        {
+            printf("Error loading %s\n", filename);
+        }
+        return false;
+    }
+
+    return true;
+}
 
 bool ChunkedFile::prepareLoadedData()
 {
@@ -101,7 +102,7 @@ bool ChunkedFile::prepareLoadedData()
         return false;
 
     // Check version
-    file_MVER* version = chunk->As<file_MVER>();
+    version = chunk->As<file_MVER>();
     if (version->fcc != MverMagic.fcc)
         return false;
     if (version->ver != FILE_FORMAT_VERSION)
@@ -119,6 +120,7 @@ void ChunkedFile::free()
     delete[] data;
     data = 0;
     data_size = 0;
+    version = 0;
 }
 
 u_map_fcc InterestingChunks[] = {
@@ -430,15 +432,22 @@ bool FileLoader::prepareLoadedData()
     // Check version
     version = (file_MVER*) data;
     if (version->fcc != 'MVER')
+    {
         return false;
+    }
     if (version->ver != FILE_FORMAT_VERSION)
+    {
         return false;
+    }
     return true;
 }
 
 void FileLoader::free()
 {
-    if (data) delete[] data;
+    if (data)
+    {
+        delete[] data;
+    }
     data = 0;
     data_size = 0;
     version = 0;
