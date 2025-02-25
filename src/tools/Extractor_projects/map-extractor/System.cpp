@@ -61,6 +61,7 @@ typedef struct
 {
     int lookupId = 0;
     string fileName;
+    string displayName;
     HANDLE fileHandle = nullptr;
     string parentFilename;             /**< The filename of the parent File */
     bool inSubfolder = false;          /**< Indicates whether its in subfolder */
@@ -68,6 +69,7 @@ typedef struct
     uint16 uint16Value = 0;
     int mpqId = 0;
 } dataFile;
+
 
 //map_id* map_ids;                    /**< TODO */
 //uint16* areas;                      /**< TODO */
@@ -81,10 +83,11 @@ bool debugLog = false;
 std::vector<dataFile> MapList;
 std::vector<dataFile> AreaList;
 std::vector<dataFile> LiquidList;
-    
+std::vector<std::string> LiquidTypeList;
+
 int ExtractFilefromMPQ(std::vector<dataFile>& dbcFiles, const char * mpqPath,string fileMask,string localPath, std::vector<dataFile> mpqfiles, bool trimLength);
 void AppendFileListTo(std::vector<dataFile> mpqFiles, std::vector<dataFile>& filelist, const char* fileMask);
-void NewReadDbcFromMPQ(std::vector<dataFile> mpqFiles, const char* fileName, std::vector<dataFile>& mapList, bool readString);
+void NewReadDbcFromMPQ(std::vector<dataFile> mpqFiles, const char* fileName, std::vector<dataFile>& mapList, int dbcType);
 int ExtractWDTFilefromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath, string localPath, std::vector<dataFile> mpqfiles);
 int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath, string localPath, std::vector<dataFile> mpqfiles);
 
@@ -418,15 +421,21 @@ bool ConvertADT(char* adt_filename, char* output_filename)
     {
         return false;
     }
-    printf(" #### 1\n");
-    
-    adt_MCIN* cells = adt.a_grid->getMCIN();
-    if (!cells)
-    {
-        //printf("Can not find cells in '%s'\n", filename);
-        return false;
-    }
-    printf(" #### 2\n");
+    //printf("#1 %s: %i\n",adt_filename, adt.GetDataSize());
+
+    //adt_MCIN* cells = adt.a_grid->getMCIN();
+
+    //printf("#2\n");
+    //if (!cells)
+    //{
+    //    //printf("Can not find cells in '%s'\n", filename);
+    //    return false;
+    //}
+
+    std::string path = output_path;
+    path += "/maps/";
+    CreateDir(path);
+
 
     memset(liquid_show, 0, sizeof(liquid_show));
     memset(liquid_flags, 0, sizeof(liquid_flags));
@@ -443,7 +452,8 @@ bool ConvertADT(char* adt_filename, char* output_filename)
     {
         for (int j = 0; j < ADT_CELLS_PER_GRID; j++)
         {
-            adt_MCNK* cell = cells->getMCNK(i, j);
+            //adt_MCNK* cell = cells->getMCNK(i, j);
+            adt_MCNK* cell = adt.cells[i][j];
             uint32 areaid = cell->areaid;
             if (areaid && areaid <= maxAreaId)
             {
@@ -458,7 +468,6 @@ bool ConvertADT(char* adt_filename, char* output_filename)
         }
     }
 
-    printf(" #### 3\n");
     //============================================
     // Try pack area data
     //============================================
@@ -500,7 +509,8 @@ bool ConvertADT(char* adt_filename, char* output_filename)
     {
         for (int j = 0; j < ADT_CELLS_PER_GRID; j++)
         {
-            adt_MCNK* cell = cells->getMCNK(i, j);
+//            adt_MCNK* cell = cells->getMCNK(i, j);
+            adt_MCNK* cell = adt.cells[i][j];
             if (!cell)
             {
                 continue;
@@ -604,21 +614,29 @@ bool ConvertADT(char* adt_filename, char* output_filename)
         }
     }
 
-    // Check for allow limit minimum height (not store height in deep ochean - allow save some memory)
+    // Check for allow limit minimum height (not store height in deep ocean - allow save some memory)
     if (CONF_allow_height_limit && minHeight < CONF_use_minHeight)
     {
         for (int y = 0; y < ADT_GRID_SIZE; y++)
+        {
             for (int x = 0; x < ADT_GRID_SIZE; x++)
+            {
                 if (V8[y][x] < CONF_use_minHeight)
                 {
                     V8[y][x] = CONF_use_minHeight;
                 }
+            }
+        }
         for (int y = 0; y <= ADT_GRID_SIZE; y++)
+        {
             for (int x = 0; x <= ADT_GRID_SIZE; x++)
+            {
                 if (V9[y][x] < CONF_use_minHeight)
                 {
                     V9[y][x] = CONF_use_minHeight;
                 }
+            }
+        }
         if (minHeight < CONF_use_minHeight)
         {
             minHeight = CONF_use_minHeight;
@@ -702,7 +720,9 @@ bool ConvertADT(char* adt_filename, char* output_filename)
     {
         for (int j = 0; j < ADT_CELLS_PER_GRID; j++)
         {
-            adt_MCNK* cell = cells->getMCNK(i, j);
+            //adt_MCNK* cell = cells->getMCNK(i, j);
+            adt_MCNK* cell = adt.cells[i][j];
+
             if (!cell)
             {
                 continue;
@@ -801,12 +821,24 @@ bool ConvertADT(char* adt_filename, char* output_filename)
                 liquid_entry[i][j] = h->liquidType;
                 switch (LiquidList[h->liquidType].uint16Value)
                 {
-                    case LIQUID_TYPE_WATER: liquid_flags[i][j] |= MAP_LIQUID_TYPE_WATER; break;
-                    case LIQUID_TYPE_OCEAN: liquid_flags[i][j] |= MAP_LIQUID_TYPE_OCEAN; break;
-                    case LIQUID_TYPE_MAGMA: liquid_flags[i][j] |= MAP_LIQUID_TYPE_MAGMA; break;
-                    case LIQUID_TYPE_SLIME: liquid_flags[i][j] |= MAP_LIQUID_TYPE_SLIME; break;
+                    case LIQUID_TYPE_WATER:
+                        liquid_flags[i][j] |= MAP_LIQUID_TYPE_WATER;
+                        break;
+                    case LIQUID_TYPE_OCEAN: 
+                        liquid_flags[i][j] |= MAP_LIQUID_TYPE_OCEAN;
+                        break;
+                    case LIQUID_TYPE_MAGMA:
+                        liquid_flags[i][j] |= MAP_LIQUID_TYPE_MAGMA;
+                        break;
+                    case LIQUID_TYPE_SLIME:
+                        liquid_flags[i][j] |= MAP_LIQUID_TYPE_SLIME;
+                        break;
                     default:
-                        printf("\nCan not find liquid type %u for map %s\nchunk %d,%d\n", h->liquidType, adt_filename, i, j);
+                        if (debugLog)
+                        {
+                            printf("   WARNING:Can not find liquid type %u for map %s - Chunk: %d,%d\n", h->liquidType, adt_filename, i, j);
+                        }
+                        liquid_flags[i][j] |= MAP_LIQUID_TYPE_NO_WATER;
                         break;
                 }
                 // Dark water detect
@@ -978,7 +1010,9 @@ bool ConvertADT(char* adt_filename, char* output_filename)
     {
         for (int j = 0; j < ADT_CELLS_PER_GRID; ++j)
         {
-            adt_MCNK* cell = cells->getMCNK(i, j);
+            //adt_MCNK* cell = cells->getMCNK(i, j);
+            adt_MCNK* cell = adt.cells[i][j];
+
             if (!cell)
             {
                 continue;
@@ -1566,7 +1600,10 @@ typedef std::map < int /*build*/, UpdatesPair > Updates;
 int main(int argc, char** argv)
 {
     HandleArgs(argc, argv);
-    
+
+    // These need to be set before the banner is shown to reflect the correct information
+    iBuildNumber = getBuildNumber(input_path);                  // Get the build number of the client from wow.exe
+    iCoreNumber = getCoreNumberFromBuild(iBuildNumber);         // Get the core number of the client from the build number
 
     showBanner("DBC Extractor & Map Generator", iCoreNumber);
     showWebsiteBanner();
@@ -1579,9 +1616,6 @@ int main(int argc, char** argv)
     printf("  Extract maps: %s\n", (CONF_extract | EXTRACT_MAP) ? "true" : "false");
 
         // Stage 1: Get the build number and core number of the client
-
-    iBuildNumber = getBuildNumber(input_path);                  // Get the build number of the client from wow.exe
-    iCoreNumber = getCoreNumberFromBuild(iBuildNumber);         // Get the core number of the client from the build number  
 
     printf("\n");
     printf(" Stage 1: Get the build number and core number of the client\n");
@@ -1617,12 +1651,8 @@ int main(int argc, char** argv)
         MAP_LIQUID_TYPE_MAGMA = 0x04;
         MAP_LIQUID_TYPE_SLIME = 0x08;
     }
- 
-    // Stage 2: Create a list of MPQ's needed for this core 
-    printf("\n");
-    printf(" Stage 2: Create a list of MPQ's needed for this core\n");
-    printf(" ====================================================\n");
 
+    // Stage 2: Create a list of MPQ's needed for this core
     std::vector<std::string> MPQList = getMPQListForCore(iCoreNumber);
     std::vector<dataFile> FinalMPQList;
 
@@ -1642,7 +1672,7 @@ int main(int argc, char** argv)
                     std::string tmp2 = input_path;
                     tmp2.append ("/Data/");
                     tmp2.append(std::regex_replace(LocaleString, std::regex("%s"), Locales[iThisLocale]));
-                    
+
                     if (ClientFileExists(tmp2.c_str()))
                     {
                         dataFile thisFile;
@@ -1675,7 +1705,7 @@ int main(int argc, char** argv)
                 else
                 {
                     //printf(" Can't find: %s \n", tmp2.c_str());
-                }   
+                }
             }
         }
         printf("\n");
@@ -1691,8 +1721,8 @@ int main(int argc, char** argv)
 
     // 2.1: Open the MPQ's
     printf("\n");
-    printf(" Stage 2.1: Open the MPQ's needed for this core\n");
-    printf(" ==============================================\n");
+    printf(" Stage 2: Open the MPQ's needed for this core\n");
+    printf(" ============================================\n");
 
     std::vector<dataFile> DBCFiles;
     std::vector<dataFile> DB2Files;
@@ -1704,7 +1734,7 @@ int main(int argc, char** argv)
     for (int i = 0; i < FinalMPQList.size(); ++i)
     {
         HANDLE fileHandle = new HANDLE;
-        printf("  %d: %s - ", i + 1, FinalMPQList[i].fileName.c_str());
+        printf("  %02d: %s - ", i + 1, FinalMPQList[i].fileName.c_str());
         /// we open multiple file handler without close?
         if (!OpenArchive(FinalMPQList[i].fileName.c_str(), &fileHandle))
         {
@@ -1731,9 +1761,9 @@ int main(int argc, char** argv)
         }
     }
     printf("\n");
-    
+
     printf("  Summary: MPQ Files: %d\n", (int)FinalMPQList.size());
-  
+
     // Stage 3: Extract the DBC files from the MPQ's
     printf("\n");
     printf(" Stage 3: Extract the DBC / DB2 files from the MPq's\n");
@@ -1748,24 +1778,29 @@ int main(int argc, char** argv)
 
     printf("\n");
     printf("  Summary: Detected %i DBC and %i DB2 Files: \n", (int)DBCFiles.size(), (int)DB2Files.size());
- 
-    printf("\n");
-    printf(" Stage 3.1: Open dbc's needed by the extractor\n");
-    printf(" =============================================\n");
 
-    NewReadDbcFromMPQ(FinalMPQList, "DBFilesClient\\Map.dbc",MapList, true);
+    printf("\n");
+    printf(" Stage 4: Open dbc's needed by the extractor\n");
+    printf(" ===========================================\n");
+
+    NewReadDbcFromMPQ(FinalMPQList, "DBFilesClient\\Map.dbc",MapList, 1);
     //ReadMapDBC("dbc/");
 
-    NewReadDbcFromMPQ(FinalMPQList, "DBFilesClient\\AreaTable.dbc",AreaList, true);
-    ////ReadAreaTableDBC();
+    // Prepare the LiquidTypeList lookup
+    LiquidTypeList.push_back("Water");
+    LiquidTypeList.push_back("Ocean");
+    LiquidTypeList.push_back("Magma");
+    LiquidTypeList.push_back("Slime");
 
-    NewReadDbcFromMPQ(FinalMPQList, "DBFilesClient\\LiquidType.dbc",LiquidList, false);
+    NewReadDbcFromMPQ(FinalMPQList, "DBFilesClient\\LiquidType.dbc",LiquidList, 3);
+
+    NewReadDbcFromMPQ(FinalMPQList, "DBFilesClient\\AreaTable.dbc",AreaList, 2);
 
     printf("\n");
     printf("  Summary: Maps: %i, Areas: %i, Liquids: %i Loaded: \n", (int)MapList.size(), (int)AreaList.size(), (int)LiquidList.size());
 
     printf("\n");
-    printf(" Stage 4: Extract WDT files needed by the extractor\n");
+    printf(" Stage 5: Extract WDT files needed by the extractor\n");
     printf(" ==================================================\n");
     for (int i = 0; i < MapList.size(); ++i)
     {
@@ -1797,7 +1832,7 @@ int main(int argc, char** argv)
 
     for (int i = 0; i < WDTFiles.size(); ++i)
     {
-        printf("   Extracting: %i  Name: %s\n",i+1,WDTFiles[i].fileName.c_str());
+        printf("   (%03i/%03i)  Extracting: %04i  Name: %s\n", i+1, (int)WDTFiles.size(), (int)WDTFiles[i].lookupId, WDTFiles[i].fileName.c_str());
         WDTCount += ExtractWDTFilefromMPQ(WDTFiles, "world\\maps\\", "wdt/", FinalMPQList);
     }
 
@@ -1806,8 +1841,8 @@ int main(int argc, char** argv)
 
     ////// Stage 5: Extract the adt files from the wdt files
     printf("\n");
-    printf(" Stage 5: Extract ADT files needed by the extractor\n");
-    printf(" ==================================================\n");
+    printf(" Stage 5: Extract ADT files needed by the extractor and create .map files\n");
+    printf(" ========================================================================\n");
     ADTCount += ExtractADTFilesfromMPQ(ADTFiles, "world\\maps\\", "adt/", FinalMPQList);
 
     printf("\n\n");
@@ -1815,24 +1850,13 @@ int main(int argc, char** argv)
 
     CloseArchives();
 
+    for (int i = 0; i < FinalMPQList.size(); ++i)
+    {
+        SFILECLOSEARCHIVE(FinalMPQList[i].fileHandle);
+    }
 
 
-    // Stage 6: Generate the map files from the adt files
-    // Loop Through x coords
-    //for (int xcoord = 0; xcoord < WDT_MAP_SIZE; xcoord++)
-    //{
-    //    //printf("   Processing...........%d%%\r", (100 * (xcoord + 1)) / WDT_MAP_SIZE);
 
-    //    // Loop Through y coords
-    //    for (int ycoord = 0; ycoord < WDT_MAP_SIZE; ycoord++)
-    //    {
-    //        sprintf(mpq_filename, "World\\Maps\\%s\\%s_%u_%u.adt", map_ids[z].name, map_ids[z].name, x, y);
-    //        sprintf(output_filename, "%s/maps/%04u%02u%02u.map", output_path, map_ids[z].id, y, x);
-
-    //        ConvertADT(mpq_filename, output_filename, build);// , y, x);
-
-    //    }
-    //}
 
     // Stage 7: Extract the ???? files into buildings
 
@@ -1954,9 +1978,10 @@ int main(int argc, char** argv)
     //        }
     //        break;
     //}
-    //printf("\n\nExtraction Completed !!!\n\n");
 
-    //return 0;
+    printf("\n\nExtraction Completed !!!\n\n");
+
+    return 0;
 }
 
 /// <summary>
@@ -2053,7 +2078,7 @@ int ExtractFilefromMPQ(std::vector<dataFile>& dbcFiles, const char * mpqPath,str
         printf("  Creating directory: %s\n", localPath.c_str());
     }
     CreateDir(localPath);
-    
+
     // extract DBCs
     for (int i = 0; i < dbcFiles.size(); ++i)
     {
@@ -2111,7 +2136,7 @@ int ExtractWDTFilefromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath, 
         printf("  Creating directory: %s\n", localPath.c_str());
     }
     CreateDir(localPath);
-    
+
     // extract DBCs
     for (int i = 0; i < dataFiles.size(); ++i)
     {
@@ -2157,17 +2182,18 @@ int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath,
     char output_filename[2048];
     char mpq_map_name[2048];
 
-    // extract DBCs
+    // extract Maps
+    //for (int i = 0; i < 1; ++i)
     for (int i = 0; i < dataFiles.size(); ++i)
     {
-        printf("   (%i/%i) Extracting map Id: %i Name: %s ADT files\n",i, (int)dataFiles.size(), (int)dataFiles[i].lookupId, dataFiles[i].fileName.c_str());
+        printf("   (%03i/%03i) Extracting map Id: %04i Name: %s ADT files\n",i, (int)dataFiles.size(), (int)dataFiles[i].lookupId, dataFiles[i].fileName.c_str());
         // Loop Through x coords
-        for (int xcoord = 0; xcoord < WDT_MAP_SIZE; xcoord++)
+        for (int ycoord = 0; ycoord < WDT_MAP_SIZE; ycoord++)
         {
-            printf("   Processing...........%d%%\r", (100 * (xcoord + 1)) / WDT_MAP_SIZE);
+            printf("   Processing...........%d%%\r", (100 * (ycoord + 1)) / WDT_MAP_SIZE);
 
             // Loop Through y coords
-            for (int ycoord = 0; ycoord < WDT_MAP_SIZE; ycoord++)
+            for (int xcoord = 0; xcoord < WDT_MAP_SIZE; xcoord++)
             {
                 // base _obj0.adt
                 std::string outputFilename = localPath;
@@ -2186,10 +2212,10 @@ int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath,
                 mpqFilename += "_";
                 mpqFilename += to_string(ycoord);
                 mpqFilename += "_obj0.adt";
-        
+
                 if (ClientFileExists(outputFilename.c_str()))
                 {
-                          count += 1;
+                    count += 1;
                 }
                 else
                 {
@@ -2220,7 +2246,7 @@ int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath,
                 mpqFilename += "_";
                 mpqFilename += to_string(ycoord);
                 mpqFilename += "_obj1.adt";
-        
+
                 if (ClientFileExists(outputFilename.c_str()))
                 {
                           count += 1;
@@ -2250,7 +2276,7 @@ int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath,
                 mpqFilename += "_";
                 mpqFilename += to_string(ycoord);
                 mpqFilename += ".adt";
-        
+
                 if (ClientFileExists(outputFilename.c_str()))
                 {
                           count += 1;
@@ -2273,7 +2299,6 @@ int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath,
                 sprintf(output_filename, "%s/maps/%04u%02u%02u.map", output_path, dataFiles[i].lookupId, ycoord, xcoord);
 
                 ConvertADT(mpq_filename, output_filename);// , y, x);
-
             }
         }
     }
@@ -2329,7 +2354,7 @@ int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath,
 //    }
 //}
 
-void NewReadDbcFromMPQ(std::vector<dataFile> mpqFiles, const char* fileName, std::vector<dataFile>& mapList, bool readString)
+void NewReadDbcFromMPQ(std::vector<dataFile> mpqFiles, const char* fileName, std::vector<dataFile>& mapList, int dbcType)
 {
     SFILE_FIND_DATA findFileData;
     for (int i = 0; i < mpqFiles.size(); ++i)
@@ -2342,7 +2367,7 @@ void NewReadDbcFromMPQ(std::vector<dataFile> mpqFiles, const char* fileName, std
                 HANDLE dbcFile;
                 if (OpenNewestFile(fileName, &dbcFile))
                 {
-                    printf("   Found %s in archive!, Reading data... \n",fileName);
+                    printf("\n   Found %s in archive!, Reading data... \n",fileName);
                 }
 
                 DBCFile dbc(dbcFile);
@@ -2351,44 +2376,76 @@ void NewReadDbcFromMPQ(std::vector<dataFile> mpqFiles, const char* fileName, std
                     size_t dbcFile_count = dbc.getRecordCount();
                     size_t maxid = dbc.getMaxId();
                     uint16* buffer = new uint16[maxid + 1];
+
+
                     for (uint32 x = 0; x < dbcFile_count; ++x)
                     {
                         dataFile dbc_record;
-                        dbc_record.lookupId = dbc.getRecord(x).getUInt(0);
-                        dbc_record.uint16Value = maxid + 1;
-                        dbc_record.mpqId = mpqFiles[i].lookupId;
-                        memset(buffer, 0xff, (maxid + 1) * sizeof(uint16));
-                        
-                        // Only add name is needed
-                        if (readString)
+                        std::string tempString = "";
+
+                        // These are used for area table processing where the fields move about
+                        int idField = 0;
+                        int valueField = 3;
+                        int nameField = 0;
+
+
+                        switch (dbcType)
                         {
-                            dbc_record.fileName = dbc.getRecord(x).getString(1);
+                            case 1: // Maps.dbc
+                                dbc_record.lookupId = dbc.getRecord(x).getUInt(0);      // Map Id
+                                dbc_record.mpqId = mpqFiles[i].lookupId;                // MPQ Id that the dbc is in
+                                dbc_record.fileName = dbc.getRecord(x).getString(1);    // Map Folder Name
+                                tempString = dbc.getRecord(x).getString(5);
+                                if (tempString.length() == 0)
+                                {
+                                    tempString = dbc_record.fileName;
+                                }
+                                dbc_record.displayName = tempString;                    // Map Display Name
+                                dbc_record.uint16Value = dbc.getRecord(x).getUInt(2);   // Map Type
+                                break;
+                            case 2: // AreaTable.dbc
+
+                                // TODO: Localised AreaTable.dbc may have the areaname in another column
+                                switch (iCoreNumber)
+                                {
+                                    case CLIENT_CLASSIC:
+                                        nameField = 11;
+                                        break;
+                                    case CLIENT_TBC:
+                                        nameField = 11;
+                                        break;
+                                    case CLIENT_WOTLK:
+                                        nameField = 11;
+                                        break;
+                                    case CLIENT_CATA:
+                                        nameField = 11;
+                                        break;
+                                        case CLIENT_MOP:
+                                        nameField = 13;
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                dbc_record.lookupId = dbc.getRecord(x).getUInt(idField);       // Area Id
+                                dbc_record.uint16Value = dbc.getRecord(x).getUInt(valueField); // Area Bit
+                                dbc_record.mpqId = mpqFiles[i].lookupId;                       // MPQ Id that the dbc is in
+                                dbc_record.fileName = dbc.getRecord(x).getString(nameField);   // Area Name
+
+                                break;
+                            case 3: // LiquidType.dbc
+                                dbc_record.lookupId = dbc.getRecord(x).getUInt(0);                       // Liquid Id
+                                dbc_record.uint16Value = dbc.getRecord(x).getUInt(3);                    // Base Liquid Type Id
+                                dbc_record.mpqId = mpqFiles[i].lookupId;                                 // MPQ Id that the dbc is in
+                                dbc_record.fileName = dbc.getRecord(x).getString(1);                     // Liquid Name
+                                dbc_record.displayName = LiquidTypeList[dbc_record.uint16Value].c_str(); // Base Liquid Name
+                                break;
+                            default:
+                                break;
                         }
 
-                        // AreaTable.dbc / LiquidType processing
-                        //areas[dbc.getRecord(x).getUInt(0)] = dbc.getRecord(x).getUInt(3);
-                        
-                        // Not sure this is correct
-                        //buffer[dbc.getRecord(x).getUInt(0)] = dbc.getRecord(x).getUInt(3);
-                        //dbc_record.uint16Value = buffer[dbc.getRecord(x).getUInt(0)];
-                        dbc_record.uint16Value = dbc.getRecord(x).getUInt(3);
-
+                        printf("    Loaded  Id: %04i  Type: %04i  Name: %s (%s)\n", dbc_record.lookupId, dbc_record.uint16Value, dbc_record.fileName.c_str(), dbc_record.displayName.c_str());
                         mapList.push_back(dbc_record);
                     }
-                    maxAreaId = dbc.getMaxId();
-
-
-                    //    size_t LiqType_count = dbc.getRecordCount();
-                    //    size_t LiqType_maxid = dbc.getMaxId();
-                    //    uint16* LiqType = new uint16[LiqType_maxid + 1];
-                    //    memset(LiqType, 0xff, (LiqType_maxid + 1) * sizeof(uint16));
-                    //
-                    //    for (uint32 x = 0; x < LiqType_count; ++x)
-                    //    {
-                    //        LiqType[dbc.getRecord(x).getUInt(0)] = dbc.getRecord(x).getUInt(3);
-                    //    }
-
-
                     break;
                 }
             }
