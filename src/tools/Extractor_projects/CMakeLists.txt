@@ -45,6 +45,14 @@ target_include_directories(map-extractor
 target_link_libraries(map-extractor
     PUBLIC
     loadlib
+    shared
+    vmap2
+    RecastNavigation::Recast
+    Threads::Threads
+    ${OPENSSL_LIBRARIES}
+#if (defined(OPENSSL_VERSION_MAJOR) && OPENSSL_VERSION_MAJOR >= 3)
+    OpenSSL::Crypto
+#endif()
 )
 
 install(

@@ -54,7 +54,7 @@
 extern ArchiveSet gOpenArchives;    /**< TODO */
 
 /**
- * @brief
+ * @brief The dataFile type is a structure that encapsulates information about a file, including its identifiers, names, handle, and folder organization attributes.
  *
  */
 typedef struct
@@ -90,6 +90,15 @@ void AppendFileListTo(std::vector<dataFile> mpqFiles, std::vector<dataFile>& fil
 void NewReadDbcFromMPQ(std::vector<dataFile> mpqFiles, const char* fileName, std::vector<dataFile>& mapList, int dbcType);
 int ExtractWDTFilefromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath, string localPath, std::vector<dataFile> mpqfiles);
 int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath, string localPath, std::vector<dataFile> mpqfiles);
+
+// VMAP Additions
+std::string outDir = std::string(output_path) + "/vmaps";
+
+char const szWorkDirWmo[]   = "./Buildings";
+char       szRawVMAPMagic[] = "VMAP000";
+
+
+
 
 /**
  * @brief Data types which can be extracted
@@ -212,83 +221,6 @@ void HandleArgs(int argc, char* arg[])
 }
 
 
-///**
-// * @brief
-// *
-// */
-//void ReadAreaTableDBC()
-//{
-//    printf("\n Read areas from AreaTable.dbc ...");
-//
-//    HANDLE dbcFile;
-//    if (!OpenNewestFile("DBFilesClient\\AreaTable.dbc", &dbcFile))
-//    {
-//        printf("Error: Cannot find AreaTable.dbc in archive!\n");
-//        exit(1);
-//    }
-//
-//    DBCFile dbc(dbcFile);
-//
-//    if (!dbc.open())
-//    {
-//        printf("Fatal error: Could not read AreaTable.dbc!\n");
-//        exit(1);
-//    }
-//
-//    size_t area_count = dbc.getRecordCount();
-//    size_t maxid = dbc.getMaxId();
-//    areas = new uint16[maxid + 1];
-//    memset(areas, 0xff, (maxid + 1) * sizeof(uint16));
-//
-//    for (uint32 x = 0; x < area_count; ++x)
-//    {
-//        areas[dbc.getRecord(x).getUInt(0)] = dbc.getRecord(x).getUInt(3);
-//    }
-//
-//    maxAreaId = dbc.getMaxId();
-//
-//    printf(" Success! %zu areas loaded.\n", area_count);
-//}
-//
-///**
-// * @brief
-// *
-// */
-//void ReadLiquidTypeTableDBC()
-//{
-//    printf("\n Reading liquid types from LiquidType.dbc...");
-//
-//    HANDLE dbcFile;
-//    if (!OpenNewestFile("DBFilesClient\\LiquidType.dbc", &dbcFile))
-//    {
-//        printf("Fatal error: Cannot find LiquidType.dbc in archive!\n");
-//        exit(1);
-//    }
-//
-//    DBCFile dbc(dbcFile);
-//    if (!dbc.open())
-//    {
-//        printf("Fatal error: Could not read LiquidType.dbc!\n");
-//        exit(1);
-//    }
-//
-//    size_t LiqType_count = dbc.getRecordCount();
-//    size_t LiqType_maxid = dbc.getMaxId();
-//    LiqType = new uint16[LiqType_maxid + 1];
-//    memset(LiqType, 0xff, (LiqType_maxid + 1) * sizeof(uint16));
-//
-//    for (uint32 x = 0; x < LiqType_count; ++x)
-//    {
-//        LiqType[dbc.getRecord(x).getUInt(0)] = dbc.getRecord(x).getUInt(3);
-//    }
-//
-//    printf(" Success! %zu liquid types loaded.\n", LiqType_count);
-//}
-
-//
-// Adt file convertor function and data
-//
-
 // Map file format data
 static char const MAP_MAGIC[]           = "MAPS"; /**< TODO */
 static char       MAP_VERSION_MAGIC[32] = "0000"; /**< TODO */
@@ -344,11 +276,8 @@ struct map_heightHeader
     float  gridMaxHeight;   /**< TODO */
 };
 
-
-
 #define MAP_LIQUID_TYPE_DARK_WATER  0x10
 #define MAP_LIQUID_TYPE_WMO_WATER   0x20
-
 
 #define MAP_LIQUID_NO_TYPE    0x0001
 #define MAP_LIQUID_NO_HEIGHT  0x0002
@@ -369,28 +298,6 @@ struct map_liquidHeader
     float  liquidLevel;     /**< TODO */
 };
 
-/**
- * @brief
- *
- * @param maxDiff
- * @return float
- */
-float selectUInt8StepStore(float maxDiff)
-{
-    return 255 / maxDiff;
-}
-
-/**
- * @brief
- *
- * @param maxDiff
- * @return float
- */
-float selectUInt16StepStore(float maxDiff)
-{
-    return 65535 / maxDiff;
-}
-
 uint16 area_flags[ADT_CELLS_PER_GRID][ADT_CELLS_PER_GRID];      /**< Temporary grid data store */
 
 float V8[ADT_GRID_SIZE][ADT_GRID_SIZE];                         /**< TODO */
@@ -408,10 +315,8 @@ float liquid_height[ADT_GRID_SIZE + 1][ADT_GRID_SIZE + 1];      /**< TODO */
 /**
  * @brief
  *
- * @param filename
- * @param filename2
- * @param build
- * @return bool
+ * @param adt_filename - The adt filename to be loaded
+ * @param output_filename - The location where the .map file is saved
  */
 bool ConvertADT(char* adt_filename, char* output_filename)
 {
@@ -421,11 +326,9 @@ bool ConvertADT(char* adt_filename, char* output_filename)
     {
         return false;
     }
-    //printf("#1 %s: %i\n",adt_filename, adt.GetDataSize());
 
+    // TODO: Not sure why this fails
     //adt_MCIN* cells = adt.a_grid->getMCIN();
-
-    //printf("#2\n");
     //if (!cells)
     //{
     //    //printf("Can not find cells in '%s'\n", filename);
@@ -435,7 +338,6 @@ bool ConvertADT(char* adt_filename, char* output_filename)
     std::string path = output_path;
     path += "/maps/";
     CreateDir(path);
-
 
     memset(liquid_show, 0, sizeof(liquid_show));
     memset(liquid_flags, 0, sizeof(liquid_flags));
@@ -650,7 +552,7 @@ bool ConvertADT(char* adt_filename, char* output_filename)
     map.heightMapOffset = map.areaMapOffset + map.areaMapSize;
     map.heightMapSize = sizeof(map_heightHeader);
 
-    map_heightHeader heightHeader;
+    map_heightHeader heightHeader{};
     heightHeader.fourcc = *(uint32 const*)MAP_HEIGHT_MAGIC;
     heightHeader.flags = 0;
     heightHeader.gridHeight    = minHeight;
@@ -824,7 +726,7 @@ bool ConvertADT(char* adt_filename, char* output_filename)
                     case LIQUID_TYPE_WATER:
                         liquid_flags[i][j] |= MAP_LIQUID_TYPE_WATER;
                         break;
-                    case LIQUID_TYPE_OCEAN: 
+                    case LIQUID_TYPE_OCEAN:
                         liquid_flags[i][j] |= MAP_LIQUID_TYPE_OCEAN;
                         break;
                     case LIQUID_TYPE_MAGMA:
@@ -1029,6 +931,7 @@ bool ConvertADT(char* adt_filename, char* output_filename)
         return false;
     }
     fwrite(&map, sizeof(map), 1, output);
+
     // Store area data
     fwrite(&areaHeader, sizeof(areaHeader), 1, output);
     if (!(areaHeader.flags & MAP_AREA_NO_AREA))
@@ -1082,236 +985,6 @@ bool ConvertADT(char* adt_filename, char* output_filename)
 
     return true;
 }
-
-///**
-// * @brief
-// *
-// */
-//void ExtractMapsFromMpq(uint32 build)
-//{
-//    char mpq_filename[2048];
-//    char output_filename[2048];
-//    char mpq_map_name[2048];
-//
-//    std::cout << std::endl << " Extracting maps... on build type " << build << std::endl;
-//    // Blizz screwed up
-//    if (build==17520)
-//	{
-//		build = 18273;
-//	}
-//
-//    uint32 map_count = ReadMapDBC();
-//
-//    ReadAreaTableDBC();
-//    ReadLiquidTypeTableDBC();
-//
-//    std::string path = output_path;
-//    path += "/maps/";
-//    CreateDir(path);
-//
-//    printf("\n Converting map files\n");
-//    for (uint32 z = 0; z < map_count; ++z)
-//    {
-//
-//        // Loadup map grid data
-//        sprintf(mpq_map_name, "World\\Maps\\%s\\%s.wdt", map_ids[z].name, map_ids[z].name);
-//        try
-//        {
-//            printf(" (%d/%d) Extract Map ID: %d  Name: %s  FROM: %s     \n", z + 1, map_count, map_ids[z].id, map_ids[z].name, mpq_map_name);
-//        }
-//        catch (const std::exception&)
-//        {
-//            printf("e #1\n");
-//        }
-//
-//        printf("#1\n");
-//        std::string path = output_path;
-//        path += "/wdt/";
-//        printf("#2\n");
-//        CreateDir(path);
-//        printf("#3\n");
-//
-//        string filename = path + mpq_map_name;
-//        printf("#4\n");
-//        try
-//        {
-//            printf(" Extracting WDT file: %s   from: %s\n", filename.c_str(), mpq_filename);
-//        }
-//        catch (const std::exception&)
-//        {
-//            printf("e #2\n");
-//        }
-//        printf("#5\n");
-//        try
-//        {
-//            ExtractFile(filename.c_str(), mpq_filename);
-//        }
-//        catch (const std::exception&)
-//        {
-//            printf("e #3\n");
-//        }
-//        printf("#6\n");
-//
-//        WDT_file wdt;
-//        if (!wdt.loadFile(mpq_map_name, true))
-//        {
-//            //printf("Warning: Failed loading map %s.wdt (This message can be safely ignored)\n", map_ids[z].name);
-//            continue;
-//        }
-//
-//        for (uint32 y = 0; y < WDT_MAP_SIZE; ++y)
-//        {
-//            for (uint32 x = 0; x < WDT_MAP_SIZE; ++x)
-//            {
-//                if (!wdt.main->adt_list[y][x].exist)
-//                {
-//                    continue;
-//                }
-//                sprintf(mpq_filename, "World\\Maps\\%s\\%s_%u_%u.adt", map_ids[z].name, map_ids[z].name, x, y);
-//                sprintf(output_filename, "%s/maps/%04u%02u%02u.map", output_path, map_ids[z].id, y, x);
-//
-//                ConvertADT(mpq_filename, output_filename, build);// , y, x);
-//            }
-//            // draw progress bar
-//            printf(" Processing........................%d%%\r", (100 * (y + 1)) / WDT_MAP_SIZE);
-//        }
-//    }
-//    delete [] areas;
-//    delete [] map_ids;
-//}
-//
-///**
-// * @brief: The ExtractDBCFiles function is responsible for extracting client database files (DBC and DB2 files) from the game archives.
-// * @param locale: The locale of the client database files to extract.
-// * @param basicLocale: A boolean value that indicates whether the locale is a basic locale or not.
-// */
-//void ExtractDBCFiles(int locale, bool basicLocale)
-//{
-//    printf(" ___________________________________    \n");
-//    printf("\n Extracting client database files...\n");
-//
-//    std::set<std::string> dbcfiles;
-//
-//    // get DBC file list
-//    ArchiveSetBounds archives = GetArchivesBounds();
-//    for (ArchiveSet::const_iterator i = archives.first; i != archives.second; ++i)
-//    {
-//        AppendFileListTo(*i, dbcfiles, "*.dbc");
-//        AppendFileListTo(*i, dbcfiles, "*.db2");
-//    }
-//
-//    std::string path = output_path;
-//    path += "/dbc/";
-//    CreateDir(path);
-//    if (iCoreNumber == CLIENT_TBC)
-//    {
-//        // extract Build info file
-//        string mpq_name = std::string("component.wow-") + Locales[locale] + ".txt";
-//        string filename = path + mpq_name;
-//
-//        ExtractFile(mpq_name.c_str(), filename);
-//    }
-//    if (iCoreNumber == CLIENT_TBC || iCoreNumber == CLIENT_WOTLK || iCoreNumber == CLIENT_CATA  || iCoreNumber == CLIENT_MOP)
-//    {
-//        if (!basicLocale)
-//        {
-//            path += Locales[locale];
-//            path += "/";
-//            CreateDir(path);
-//        }
-//
-//        // extract Build info file
-//        {
-//            std::string mpq_name = std::string("component.wow-") + Locales[locale] + ".txt";
-//            std::string filename = path + mpq_name;
-//
-//            std::cout << "    " << filename;
-//            ExtractFile(mpq_name.c_str(), filename);
-//        }
-//    }
-//
-//    // extract DBCs
-//    int count = 0;
-//    for (std::set<std::string>::iterator iter = dbcfiles.begin(); iter != dbcfiles.end(); ++iter)
-//    {
-//        std::string filename = path;
-//        filename += (iter->c_str() + strlen("DBFilesClient\\"));
-//
-//        if (ExtractFile(iter->c_str(), filename))
-//        {
-//			printf(" %s \n", filename.c_str());
-//            ++count;
-//        }
-//    }
-//
-//    printf("Extracted %u DBC/DB2 files\n\n", count);
-//}
-//
-///**
-// * @brief: The ExtractWDTFiles function is responsible for extracting client database files (DBC and DB2 files) from the game archives.
-// * @param locale: The locale of the client database files to extract.
-// * @param basicLocale: A boolean value that indicates whether the locale is a basic locale or not.
-// */
-//void ExtractWDTFiles(int locale, bool basicLocale)
-//{
-//    printf(" ___________________________________    \n");
-//    printf("\n Extracting WDT files...\n");
-//
-//    std::set<std::string> wdtfiles;
-//
-//    // get WDT file list
-//    ArchiveSetBounds archives = GetArchivesBounds();
-//    for (ArchiveSet::const_iterator i = archives.first; i != archives.second; ++i)
-//    {
-//        AppendFileListTo(*i, wdtfiles, "*.wdt");
-//    }
-//
-//    std::string path = output_path;
-//    path += "/wdt/";
-//    CreateDir(path);
-//    if (iCoreNumber == CLIENT_TBC)
-//    {
-//        // extract Build info file
-//        string mpq_name = std::string("component.wow-") + Locales[locale] + ".txt";
-//        string filename = path + mpq_name;
-//
-//        ExtractFile(mpq_name.c_str(), filename);
-//    }
-//    if (iCoreNumber == CLIENT_TBC || iCoreNumber == CLIENT_WOTLK || iCoreNumber == CLIENT_CATA  || iCoreNumber == CLIENT_MOP)
-//    {
-//        if (!basicLocale)
-//        {
-//            path += Locales[locale];
-//            path += "/";
-//            CreateDir(path);
-//        }
-//
-//        // extract Build info file
-//        {
-//            std::string mpq_name = std::string("component.wow-") + Locales[locale] + ".txt";
-//            std::string filename = path + mpq_name;
-//
-//            ExtractFile(mpq_name.c_str(), filename);
-//        }
-//    }
-//
-//    // extract WDT
-//    int count = 0;
-//    for (std::set<std::string>::iterator iter = wdtfiles.begin(); iter != wdtfiles.end(); ++iter)
-//    {
-//        std::string filename = path;
-//        filename += (iter->c_str() + strlen("DBFilesClient\\"));
-//        printf(" %s \n", filename.c_str());
-//        if (ExtractFile(iter->c_str(), filename))
-//        {
-//			printf(" %s \n", filename.c_str());
-//            ++count;
-//        }
-//    }
-//
-//    printf("Extracted %u WDT files\n\n", count);
-//}
-
 
 typedef std::pair < std::string /*full_filename*/, char const* /*locale_prefix*/ > UpdatesPair;
 typedef std::map < int /*build*/, UpdatesPair > Updates;
@@ -1615,7 +1288,7 @@ int main(int argc, char** argv)
     printf("  Extract dbc: %s\n", (CONF_extract | EXTRACT_DBC_EXTRACTORS_ALL) ? "true" : "false");
     printf("  Extract maps: %s\n", (CONF_extract | EXTRACT_MAP) ? "true" : "false");
 
-        // Stage 1: Get the build number and core number of the client
+    // Stage 1: Get the build number and core number of the client
 
     printf("\n");
     printf(" Stage 1: Get the build number and core number of the client\n");
@@ -1680,12 +1353,7 @@ int main(int argc, char** argv)
                         thisFile.subfolderPath = Locales[iThisLocale];
                         thisFile.inSubfolder = true;
 
-                        //printf(" Found: locale MPQ: %s \n", tmp2.c_str());
                         FinalMPQList.push_back(thisFile);
-                    }
-                    else
-                    {
-//                        printf(" Can't find: %s \n", tmp2.c_str());
                     }
                 }
             }
@@ -1701,10 +1369,6 @@ int main(int argc, char** argv)
                     thisFile.subfolderPath = "";
                     thisFile.inSubfolder = false;
                     FinalMPQList.push_back(thisFile);
-                }
-                else
-                {
-                    //printf(" Can't find: %s \n", tmp2.c_str());
                 }
             }
         }
@@ -1772,6 +1436,7 @@ int main(int argc, char** argv)
     AppendFileListTo(FinalMPQList, DBCFiles, "*.dbc");
     const char* mpqPath = "DBFilesClient\\";
     DBCDB2Count = ExtractFilefromMPQ(DBCFiles,mpqPath, "*.dbc","dbc/", FinalMPQList,true);
+
     AppendFileListTo(FinalMPQList, DB2Files, "*.db2");
     mpqPath = "DBFilesClient\\";
     DBCDB2Count += ExtractFilefromMPQ(DB2Files, mpqPath, "*.db2","dbc/", FinalMPQList,true);
@@ -1820,8 +1485,6 @@ int main(int argc, char** argv)
 
         dataFile thisAdtFile;
         std::string thisMapAdtFilename = MapList[i].fileName;
-        //thisMapAdtFilename.append (".adt");
-
 
         thisAdtFile.fileName = thisMapAdtFilename;
         thisAdtFile.subfolderPath = thisMapWdtFolder;
@@ -1848,17 +1511,40 @@ int main(int argc, char** argv)
     printf("\n\n");
     printf("   Summary: Processed %i ADT Files from %i maps\n", ADTCount, (int)ADTFiles.size());
 
-    CloseArchives();
+    // Stage 7: Extract the ???? files into buildings
 
-    for (int i = 0; i < FinalMPQList.size(); ++i)
+
+    showBanner("Vertical Map Asset Extractor", iCoreNumber);
+    setVMapMagicVersion(iCoreNumber, szRawVMAPMagic);
+    showWebsiteBanner();
+
+    bool success = true;
+    std::string sdir = std::string(szWorkDirWmo) + "/dir";
+    std::string sdir_bin = std::string(szWorkDirWmo) + "/dir_bin";
+    struct stat status;
+    bool dirty = false;
+
+    if (!stat(sdir.c_str(), &status) || !stat(sdir_bin.c_str(), &status))
     {
-        SFILECLOSEARCHIVE(FinalMPQList[i].fileHandle);
+        printf(" Your %s directory seems to exist, please delete it!\n", szWorkDirWmo);
+        dirty = true;
     }
 
+    if (!stat(outDir.c_str(), &status))
+    {
+        printf(" Your %s directory seems to exist, please delete it!\n", outDir.c_str());
+        dirty = true;
+    }
 
+    if (dirty)
+    {
+        printf(" <press return to exit>");
+        char garbage[2];
+        int ret = scanf("%c", garbage);
+        return 1;
+    }
 
-
-    // Stage 7: Extract the ???? files into buildings
+    printf(" Beginning work ....\n");
 
 
     // Stage 8: Create VMTile files
@@ -1978,6 +1664,13 @@ int main(int argc, char** argv)
     //        }
     //        break;
     //}
+
+    CloseArchives();
+    for (int i = 0; i < FinalMPQList.size(); ++i)
+    {
+        SFILECLOSEARCHIVE(FinalMPQList[i].fileHandle);
+    }
+
 
     printf("\n\nExtraction Completed !!!\n\n");
 
@@ -2127,6 +1820,15 @@ int ExtractFilefromMPQ(std::vector<dataFile>& dbcFiles, const char * mpqPath,str
     return dbcFiles.size();
 }
 
+/// <summary>
+/// The ExtractWDTFilefromMPQ function is responsible for extracting WDT (World Data Table) files
+/// from MPQ archives and saving them to a specified local directory.
+/// </summary>
+/// <param name="dataFiles">A reference to a vector of dataFile structures representing the WDT files to be extracted.</param>
+/// <param name="mpqFilePath">The path within the MPQ archive where the WDT files are located.</param>
+/// <param name="localPath">The local directory where the extracted WDT files will be saved.</param>
+/// <param name="mpqfiles">A vector of dataFile structures representing the MPQ files.</param>
+/// <returns>int<returns>The number of WDT files successfully extracted.
 int ExtractWDTFilefromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath, string localPath, std::vector<dataFile> mpqfiles)
 {
     bool fileFound = false;
@@ -2289,12 +1991,6 @@ int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath,
                     }
                 }
 
-                //sprintf(mpq_filename, "World\\Maps\\%s\\%s_%u_%u.adt", map_ids[z].name, map_ids[z].name, x, y);
-                //sprintf(output_filename, "%s/maps/%04u%02u%02u.map", output_path, map_ids[z].id, y, x);
-
-                //ConvertADT(mpq_filename, output_filename, build);// , y, x);
-
-
                 sprintf(mpq_filename, "adt/%s_%u_%u.adt", dataFiles[i].fileName.c_str(), xcoord, ycoord);
                 sprintf(output_filename, "%s/maps/%04u%02u%02u.map", output_path, dataFiles[i].lookupId, ycoord, xcoord);
 
@@ -2404,6 +2100,10 @@ void NewReadDbcFromMPQ(std::vector<dataFile> mpqFiles, const char* fileName, std
                                 dbc_record.uint16Value = dbc.getRecord(x).getUInt(2);   // Map Type
                                 break;
                             case 2: // AreaTable.dbc
+                                if (maxAreaId < maxid)
+                                {
+                                    maxAreaId = maxid;
+                                }
 
                                 // TODO: Localised AreaTable.dbc may have the areaname in another column
                                 switch (iCoreNumber)
@@ -2456,3 +2156,75 @@ void NewReadDbcFromMPQ(std::vector<dataFile> mpqFiles, const char* fileName, std
         }
     }
 }
+
+// The start of VMAP Extras
+bool AssembleVMAP(std::string src, std::string dest, const char* szMagic);
+#define MPQ_BLOCK_SIZE 0x1000
+
+//static void ParseMapFiles()
+//{
+//    char fn[512];
+//    //char id_filename[64];
+//    char id[10];
+//    StringSet failedPaths;
+//    printf("\n");
+//    for (unsigned int i = 0; i < MapList.size(); ++i)
+//    {
+//        sprintf(id, "%03u", MapList[i].lookupId);
+//        sprintf(fn, "World\\Maps\\%s\\%s.wdt", MapList[i].fileName, MapList[i].fileName);
+//
+//        HANDLE handleWDT;
+//        if (!OpenNewestFile(fn, &handleWDT))
+//        {
+//            printf("Error opening WDT file %s\n", fn);
+//            continue;
+//        }
+//
+//        WDTFile WDT(handleWDT, fn, MapList[i].fileName);
+//        if (WDT.init(id, MapList[i].lookupId))
+//        {
+//            printf(" Processing Map %u (%s)\n[", MapList[i].lookupId, MapList[i].fileName);
+//            for (int x = 0; x < 64; ++x)
+//            {
+//                for (int y = 0; y < 64; ++y)
+//                {
+//                    if (ADTFile* ADT = WDT.GetMap(x, y))
+//                    {
+//                        //sprintf(id_filename,"%02u %02u %03u",x,y,map_ids[i].id);//!!!!!!!!!
+//                        ADT->init(MapList[i].lookupId, x, y, failedPaths, iCoreNumber, szRawVMAPMagic);
+//                        delete ADT;
+//                    }
+//                }
+//                printf("#");
+//                fflush(stdout);
+//            }
+//            printf("]\n");
+//        }
+//    }
+//
+//    if (!failedPaths.empty())
+//    {
+//        printf(" Warning: Some models could not be extracted, see below\n");
+//        for (StringSet::const_iterator itr = failedPaths.begin(); itr != failedPaths.end(); ++itr)
+//        {
+//            printf("Could not find file of model %s\n", itr->c_str());
+//        }
+//        printf(" A few not found models can be expected and are not alarming.\n");
+//    }
+//}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -34,42 +34,9 @@
  */
 typedef std::set<std::string> StringSet;
 
-/**
- * @brief
- *
- */
-enum ModelFlags
-{
-    MOD_M2 = 1,
-    MOD_WORLDSPAWN = 1 << 1,
-    MOD_HAS_BOUND = 1 << 2
-};
 
 extern char const szWorkDirWmo[]; /**< TODO */
 //extern const char* szRawVMAPMagic; /**< vmap magic string for extracted raw vmap data */
 
-/**
- * @brief Test if the specified file exists in the building directory
- *
- * @param file
- * @return bool
- */
-bool FileExists(const char* file);
-
-/**
- * @brief Get "uniform" name for a path (a uniform name has the format <md5hash>-<filename>.<ext>)
- *
- * @param path
- * @return string
- */
-std::string GetUniformName(std::string& path);
-
-/**
- * @brief Get extension for a file
- *
- * @param file
- * @return extension, if found, or empty string if not
- */
-std::string GetExtension(std::string& file);
 
 #endif

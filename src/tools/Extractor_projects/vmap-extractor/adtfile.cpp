@@ -26,6 +26,7 @@
 #include <cstdio>
 #include "vmapexport.h"
 #include "adtfile.h"
+#include <ExtractorCommon.h>
 
 ADTFile::ADTFile(char* filename): AdtFilename(filename)
 {

@@ -25,6 +25,7 @@
 #include <cstdio>
 #include "vmapexport.h"
 #include "wdtfile.h"
+#include <ExtractorCommon.h>
 
 WDTFile::WDTFile(HANDLE handle, char* file_name, char* file_name1): WDT(handle, file_name)
 {

@@ -22,12 +22,16 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#ifndef EXTRACTOR_COMMON_H
+#define EXTRACTOR_COMMON_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
 #include <sstream>
 #include "loadlib.h"
 #include <vector>
+#include <md5.h>
 
 /// all of the updates for this version of WoW
 uint32 const Builds[] = {16016, 16048, 16057, 16309, 16357, 16516, 16650, 16844, 16965, 17116, 17266, 17325, 17345, 17538, 17645, 17688, 17898, 18273};
@@ -49,6 +53,31 @@ bool CreateDir(const std::string& sPath);
 bool ClientFileExists(const char* sFileName);
 bool isTransportMap(int mapID);
 bool shouldSkipMap(int mapID, bool m_skipContinents, bool m_skipJunkMaps, bool m_skipBattlegrounds);
+/**
+ * @brief Test if the specified file exists in the building directory
+ *
+ * @param file
+ * @return bool
+ */
+bool FileExists(const char* file);
+
+/**
+ * @brief Get "uniform" name for a path (a uniform name has the format <md5hash>-<filename>.<ext>)
+ *
+ * @param path
+ * @return string
+ */
+std::string GetUniformName(std::string& path);
+
+/**
+ * @brief Get extension for a file
+ *
+ * @param file
+ * @return extension, if found, or empty string if not
+ */
+std::string GetExtension(std::string& file);
+
+bool scan_patches(char* scanmatch, std::vector<std::string>& pArchiveNames);
 
 /// Enumerated Core Numbers
 enum CoreNumber
@@ -62,6 +91,14 @@ enum CoreNumber
     CLIENT_LEGION  = 6
 };
 
-//std::vector<std::string> getMPQListForCore(int client);
-//
-//
+/**
+ * @brief
+ *
+ */
+enum ModelFlags
+{
+    MOD_M2 = 1,
+    MOD_WORLDSPAWN = 1 << 1,
+    MOD_HAS_BOUND = 1 << 2
+};
+#endif

@@ -28,6 +28,7 @@
 #include <cstdlib>
 #include <cstring>
 #include "ExtractorCommon.h"
+#include <algorithm>
 #include <vector>
 
 #ifdef WIN32
@@ -728,3 +729,108 @@ bool shouldSkipMap(int mapID,bool m_skipContinents, bool m_skipJunkMaps, bool m_
     return false;
 }
 
+bool FileExists(const char* file)
+{
+    if (FILE* n = std::fopen(file, "rb"))
+    {
+        fclose(n);
+        return true;
+    }
+    return false;
+}
+
+void compute_md5(const char* value, char* result)
+{
+    md5_byte_t digest[16];
+    md5_state_t ctx;
+
+    mangos_md5_init(&ctx);
+    md5_append(&ctx, (const unsigned char*)value, strlen(value));
+    md5_finish(&ctx, digest);
+
+    for(int i=0;i<16;i++)
+    {
+        sprintf(result+2*i,"%02x",digest[i]);
+    }
+    result[32]='\0';
+}
+
+std::string GetUniformName(std::string& path)
+{
+    std::transform(path.begin(),path.end(),path.begin(),::tolower);
+
+    std::string tempPath;
+    std::string file;
+    char digest[33];
+
+    std::size_t found = path.find_last_of("/\\");
+    if (found != std::string::npos)
+    {
+      file = path.substr(found+1);
+      tempPath = path.substr(0,found);
+    }
+    else
+    {
+        file = tempPath = path;
+    }
+
+    if(!tempPath.empty())
+    {
+        compute_md5(tempPath.c_str(),digest);
+    }
+    else
+    {
+        compute_md5("\\",digest);
+    }
+
+    std::string result;
+    result = result.assign(digest) + "-" + file;
+
+    return result;
+}
+
+std::string GetExtension(std::string& path)
+{
+    std::string ext;
+    size_t foundExt = path.find_last_of(".");
+    if (foundExt != std::string::npos)
+    {
+        ext=path.substr(foundExt+1);
+    }
+    else
+    {
+        ext.clear();
+    }
+    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+    return ext;
+}
+
+bool scan_patches(char* scanmatch, std::vector<std::string>& pArchiveNames)
+{
+    int i;
+    char path[512];
+
+    for (i = 1; i <= 99; i++)
+    {
+        if (i != 1)
+        {
+            sprintf(path, "%s-%d.MPQ", scanmatch, i);
+        }
+        else
+        {
+            sprintf(path, "%s.MPQ", scanmatch);
+        }
+#ifdef __linux__
+        if (FILE* h = fopen64(path, "rb"))
+#else
+        if (FILE* h = fopen(path, "rb"))
+#endif
+        {
+            fclose(h);
+            //matches.push_back(path);
+            pArchiveNames.push_back(path);
+        }
+    }
+
+    return(true);
+}
