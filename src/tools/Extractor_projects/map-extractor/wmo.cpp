@@ -736,7 +736,7 @@ bool ExtractSingleWmo(std::string& fname, int iCoreNumber, std::string szRawVMAP
     return true;
 }
 
-bool ExtractWmo(int iCoreNumber, std::string szRawVMAPMagic, std::string szWorkDirWmo, bool preciseVectorData)
+bool ExtractWmo(int iCoreNumber, std::string szRawVMAPMagic, bool preciseVectorData, std::string szWorkDirWmo)
 {
     bool success = true;
 
