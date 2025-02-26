@@ -66,7 +66,7 @@ class WDTFile
          * @param mapID
          * @return bool
          */
-        bool init(char* map_id, unsigned int mapID);
+        bool init(char* map_id, unsigned int mapID, std::string szWorkDirWmo);
 
         bool hasTerrain(int x, int y);
 

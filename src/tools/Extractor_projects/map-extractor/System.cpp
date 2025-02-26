@@ -84,6 +84,8 @@ std::vector<dataFile> MapList;
 std::vector<dataFile> AreaList;
 std::vector<dataFile> LiquidList;
 std::vector<std::string> LiquidTypeList;
+std::string szWorkDirWmo   = "./Buildings";
+std::string szRawVMAPMagic = "VMAP000";
 
 int ExtractFilefromMPQ(std::vector<dataFile>& dbcFiles, const char * mpqPath,string fileMask,string localPath, std::vector<dataFile> mpqfiles, bool trimLength);
 void AppendFileListTo(std::vector<dataFile> mpqFiles, std::vector<dataFile>& filelist, const char* fileMask);
@@ -94,8 +96,6 @@ int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath,
 // VMAP Additions
 std::string outDir = std::string(output_path) + "/vmaps";
 
-char const szWorkDirWmo[]   = "./Buildings";
-char       szRawVMAPMagic[] = "VMAP000";
 
 
 
@@ -2158,7 +2158,7 @@ void NewReadDbcFromMPQ(std::vector<dataFile> mpqFiles, const char* fileName, std
 }
 
 // The start of VMAP Extras
-bool AssembleVMAP(std::string src, std::string dest, const char* szMagic);
+bool AssembleVMAP(std::string src, std::string dest, std::string szMagic);
 #define MPQ_BLOCK_SIZE 0x1000
 
 //static void ParseMapFiles()

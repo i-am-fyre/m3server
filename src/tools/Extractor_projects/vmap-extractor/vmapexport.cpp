@@ -69,8 +69,10 @@
 #define MPQ_BLOCK_SIZE 0x1000
 //-----------------------------------------------------------------------------
 
-bool AssembleVMAP(std::string src, std::string dest, const char* szMagic);
+bool AssembleVMAP(std::string src, std::string dest, std::string szMagic);
 extern ArchiveSet gOpenArchives;
+std::string szWorkDirWmo   = "./Buildings";
+std::string szRawVMAPMagic = "VMAP000";
 
 typedef struct
 {
@@ -142,8 +144,6 @@ typedef std::map < int /*build*/, UpdatesPair > Updates;
 //};
 
 //static const char * szWorkDirMaps = ".\\Maps";
-char const szWorkDirWmo[]   = "./Buildings";
-char       szRawVMAPMagic[] = "VMAP000";
 
 // Local testing functions
 
@@ -182,7 +182,7 @@ void ReadLiquidTypeTableDBC()
     printf(" Success! %zu liquid types loaded.\n", LiqType_count);
 }
 
-static void ParseMapFiles()
+static void ParseMapFiles(std::string szRawVMAPMagic)
 {
     char fn[512];
     //char id_filename[64];
@@ -202,7 +202,7 @@ static void ParseMapFiles()
         }
 
         WDTFile WDT(handleWDT, fn, map_ids[i].name);
-        if (WDT.init(id, map_ids[i].id))
+        if (WDT.init(id, map_ids[i].id, szWorkDirWmo))
         {
             printf(" Processing Map %u (%s)\n[", map_ids[i].id, map_ids[i].name);
             for (int x = 0; x < 64; ++x)
@@ -212,7 +212,7 @@ static void ParseMapFiles()
                     if (ADTFile* ADT = WDT.GetMap(x, y))
                     {
                         //sprintf(id_filename,"%02u %02u %03u",x,y,map_ids[i].id);//!!!!!!!!!
-                        ADT->init(map_ids[i].id, x, y, failedPaths, iCoreNumber, szRawVMAPMagic);
+                        ADT->init(map_ids[i].id, x, y, failedPaths, iCoreNumber, szRawVMAPMagic, preciseVectorData, szWorkDirWmo);
                         delete ADT;
                     }
                 }
@@ -603,7 +603,7 @@ int main(int argc, char** argv)
     // extract data
     if (success)
     {
-        success = ExtractWmo(iCoreNumber, szRawVMAPMagic);
+        success = ExtractWmo(iCoreNumber, szRawVMAPMagic, preciseVectorData, szWorkDirWmo);
     }
 
     // Open map.dbc
@@ -636,11 +636,11 @@ int main(int argc, char** argv)
         }
 
 
-        ParseMapFiles();
+        ParseMapFiles(szRawVMAPMagic);
         delete [] map_ids;
         //nError = ERROR_SUCCESS;
         // Extract models, listed in DameObjectDisplayInfo.dbc
-        ExtractGameobjectModels(iCoreNumber, szRawVMAPMagic);
+        ExtractGameobjectModels(iCoreNumber, szRawVMAPMagic, preciseVectorData,szWorkDirWmo);
     }
 
     delete [] LiqType;

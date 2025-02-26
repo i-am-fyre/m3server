@@ -59,7 +59,7 @@ class ADTFile
          * @param failedPaths
          * @return bool
          */
-        bool init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failedPaths,int iCoreNumber, const void *szRawVMAPMagic);
+        bool init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failedPaths,int iCoreNumber, std::string szRawVMAPMagic, bool preciseVectorData, std::string szWorkDirWmo);
     private:
         std::string AdtFilename; /**< TODO */
 };

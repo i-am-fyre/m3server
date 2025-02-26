@@ -49,12 +49,13 @@ std::vector<std::string> getMPQListForCore(int coreNumber);
 void showBanner(const std::string& title, int iCoreNumber);
 void showWebsiteBanner();
 void setMapMagicVersion(int iCoreNumber, char* magic);
-void setVMapMagicVersion(int iCoreNumber, char* magic);
+void setVMapMagicVersion(int iCoreNumber, std::string& magic);
 void setMMapMagicVersion(int iCoreNumber, char* magic);
 bool CreateDir(const std::string& sPath);
 bool ClientFileExists(const char* sFileName);
 bool isTransportMap(int mapID);
 bool shouldSkipMap(int mapID, bool m_skipContinents, bool m_skipJunkMaps, bool m_skipBattlegrounds);
+
 /**
  * @brief
  *

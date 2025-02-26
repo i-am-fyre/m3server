@@ -31,7 +31,21 @@ set(SHARED_SRCS
 #=======================================================#
 add_executable(map-extractor
     map-extractor/System.cpp
+    map-extractor/assembler.cpp
     map-extractor/dbcfile.cpp
+    map-extractor/dbcfile.h
+    #map-extractor/adtfile.cpp
+    #map-extractor/adtfile.h
+    #map-extractor/wdtfile.cpp
+    #map-extractor/wdtfile.h
+    map-extractor/wmo.cpp
+    map-extractor/wmo.h
+    map-extractor/model.cpp
+    #map-extractor/model.h
+    map-extractor/modelheaders.h
+    map-extractor/vec3d.h
+    #map-extractor/vmapexport.cpp
+    #map-extractor/vmapexport.h
     ${SHARED_SRCS}
     $<$<BOOL:${WIN32}>:map-extractor/map-extractor.rc>
 )

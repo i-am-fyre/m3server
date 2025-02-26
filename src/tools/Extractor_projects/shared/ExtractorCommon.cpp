@@ -468,33 +468,33 @@ void setMapMagicVersion(int iCoreNumber, char* magic)
 *
 *  @PARAM iCoreNumber is the Core Number
 */
-void setVMapMagicVersion(int iCoreNumber, char* magic)
+void setVMapMagicVersion(int iCoreNumber, std::string& magic)
 {
     switch (iCoreNumber)
     {
     case CLIENT_CLASSIC:
-        std::strcpy(magic,"VMAPz07");
+        magic = "VMAPz07";
         break;
     case CLIENT_TBC:
-        std::strcpy(magic,"VMAPs07");
+        magic = "VMAPs07";
         break;
     case CLIENT_WOTLK:
-        std::strcpy(magic,"VMAPt07");
+        magic = "VMAPt07";
         break;
     case CLIENT_CATA:
-        std::strcpy(magic,"VMAPc07");
+        magic = "VMAPc07";
         break;
     case CLIENT_MOP:
-        std::strcpy(magic,"VMAPp07");
+        magic = "VMAPp07";
         break;
     case CLIENT_WOD:
-        std::strcpy(magic,"VMAPw07");
+        magic = "VMAPw07";
         break;
     case CLIENT_LEGION:
-        std::strcpy(magic,"VMAPl07");
+        magic = "VMAPl07";
         break;
     default:
-        std::strcpy(magic,"VMAPUNK");
+        magic = "VMAPUNK";
         break;
     }
 }

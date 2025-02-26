@@ -28,8 +28,4 @@
 #include <string>
 #include <set>
 
-extern char const szWorkDirWmo[]; /**< TODO */
-//extern const char* szRawVMAPMagic; /**< vmap magic string for extracted raw vmap data */
-
-
 #endif

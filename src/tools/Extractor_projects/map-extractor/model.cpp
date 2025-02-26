@@ -278,7 +278,7 @@ bool ExtractSingleModel(std::string& origPath, std::string& fixedName, StringSet
         return false;
     }
 
-    return mdl.ConvertToVMAPModel(output, iCoreNumber, szRawVMAPMagic, preciseVectorData ,szWorkDirWmo);
+    return mdl.ConvertToVMAPModel(output, iCoreNumber, szRawVMAPMagic, preciseVectorData, szWorkDirWmo);
 }
 
 void ExtractGameobjectModels(int iCoreNumber, std::string szRawVMAPMagic, bool preciseVectorData, std::string szWorkDirWmo)

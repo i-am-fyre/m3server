@@ -29,16 +29,27 @@
 
 #include <cstdio>
 
-DBCFile::DBCFile(const std::string& filename) :
+DBCFile::DBCFile(const std::string& filename):
     filename(filename),
-    data(0)
+    fileHandle(NULL),
+    recordSize(0),
+    recordCount(0),
+    fieldCount(0),
+    stringSize(0),
+    data(0),
+    stringTable(0)
 {
-
 }
 
-DBCFile::DBCFile(HANDLE file) : fileHandle(file), data(0)
+DBCFile::DBCFile(HANDLE file) 
+    : fileHandle(file), 
+      data(0), 
+      recordSize(0), 
+      recordCount(0), 
+      fieldCount(0), 
+      stringSize(0), 
+      stringTable(0) 
 {
-
 }
 
 bool DBCFile::open()
@@ -116,7 +127,7 @@ bool DBCFile::open()
 }
 DBCFile::~DBCFile()
 {
-    delete[] data;
+    delete [] data;
 }
 
 DBCFile::Record DBCFile::getRecord(size_t id)

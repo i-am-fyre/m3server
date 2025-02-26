@@ -35,7 +35,7 @@ WDTFile::WDTFile(HANDLE handle, char* file_name, char* file_name1): WDT(handle, 
         mapAreaInfo[i] = NULL;
     }
 }
-bool WDTFile::init(char* map_id, unsigned int mapID)
+bool WDTFile::init(char* map_id, unsigned int mapID, std::string szWorkDirWmo)
 {
     if (WDT.isEof())
     {
@@ -116,7 +116,7 @@ bool WDTFile::init(char* map_id, unsigned int mapID)
                 {
                     int id;
                     WDT.read(&id, 4);
-                    WMOInstance inst(WDT, gWmoInstansName[id], mapID, 65, 65, dirfile);
+                    WMOInstance inst(WDT, gWmoInstansName[id], mapID, 65, 65, dirfile, szWorkDirWmo);
                 }
                 delete[] gWmoInstansName;
             }

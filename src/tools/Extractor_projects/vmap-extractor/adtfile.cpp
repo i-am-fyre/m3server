@@ -32,7 +32,7 @@ ADTFile::ADTFile(std::string filename): AdtFilename(filename)
 {
 }
 
-bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failedPaths,int iCoreNumber, const void *szRawVMAPMagic)
+bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failedPaths,int iCoreNumber, std::string szRawVMAPMagic, bool preciseVectorData, std::string szWorkDirWmo)
 {
     HANDLE adtHandle;
 
@@ -102,7 +102,7 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failed
                 {
                     std::string path(p);                         // Store copy after name fixed
                     std::string uName;
-                    ExtractSingleModel(path, uName, failedPaths, iCoreNumber, szRawVMAPMagic);
+                    ExtractSingleModel(path, uName, failedPaths, iCoreNumber, szRawVMAPMagic, preciseVectorData, szWorkDirWmo);
                     ModelInstansName[t++] = uName;
                     p = p + strlen(p) + 1;
                 }
@@ -137,7 +137,7 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failed
                 {
                     uint32 id;
                     ADT.read(&id, 4);
-                    ModelInstance inst(ADT, ModelInstansName[id], map_num, tileX, tileY, dirfile, iCoreNumber);
+                    ModelInstance inst(ADT, ModelInstansName[id], map_num, tileX, tileY, dirfile, iCoreNumber, szWorkDirWmo);
                 }
                 delete[] ModelInstansName;
             }
@@ -151,7 +151,7 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failed
                 {
                     uint32 id;
                     ADT.read(&id, 4);
-                    WMOInstance inst(ADT, WmoInstansName[id], map_num, tileX, tileY, dirfile);
+                    WMOInstance inst(ADT, WmoInstansName[id], map_num, tileX, tileY, dirfile, szWorkDirWmo);
                 }
                 delete[] WmoInstansName;
             }

@@ -644,7 +644,7 @@ bool ExtractSingleWmo(std::string& fname, int iCoreNumber, std::string szRawVMAP
     char szLocalFile[1024];
     string plain_name = GetUniformName(fname);
 
-    sprintf(szLocalFile, "%s/%s", szWorkDirWmo, plain_name.c_str());
+    sprintf(szLocalFile, "%s/%s", szWorkDirWmo.c_str(), plain_name.c_str());
 
 
     if (FileExists(szLocalFile))
@@ -736,7 +736,7 @@ bool ExtractSingleWmo(std::string& fname, int iCoreNumber, std::string szRawVMAP
     return true;
 }
 
-bool ExtractWmo(int iCoreNumber, std::string szRawVMAPMagic, bool preciseVectorData, std::string szWorkDirWmo)
+bool ExtractWmo(int iCoreNumber, std::string szRawVMAPMagic, std::string szWorkDirWmo, bool preciseVectorData)
 {
     bool success = true;
 
