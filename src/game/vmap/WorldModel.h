@@ -50,7 +50,7 @@ namespace VMAP
              * @brief
              *
              */
-            MeshTriangle() {};
+            MeshTriangle() : idx0(0), idx1(0), idx2(0) {};
             /**
              * @brief
              *
@@ -151,7 +151,8 @@ namespace VMAP
              * @brief
              *
              */
-            WmoLiquid(): iHeight(0), iFlags(0) {};
+            WmoLiquid(): iTilesX(0), iTilesY(0), iType(0), iHeight(0), iFlags(0) {};
+
             uint32 iTilesX;  /**< number of tiles in x direction, each */
             uint32 iTilesY;  /**< TODO */
             Vector3 iCorner; /**< the lower corner */
@@ -175,13 +176,15 @@ namespace VMAP
              * @brief
              *
              */
-            GroupModel(): iLiquid(0) {}
+            GroupModel() : iMogpFlags(0), iGroupWMOID(0), iLiquid(0) {}
+
             /**
              * @brief
              *
              * @param other
              */
             GroupModel(const GroupModel& other);
+
             /**
              * @brief
              *
@@ -191,6 +194,7 @@ namespace VMAP
              */
             GroupModel(uint32 mogpFlags, uint32 groupWMOID, const AABox& bound):
                 iBound(bound), iMogpFlags(mogpFlags), iGroupWMOID(groupWMOID), iLiquid(0) {}
+
             /**
              * @brief
              *
@@ -204,12 +208,14 @@ namespace VMAP
              * @param tri
              */
             void SetMeshData(std::vector<Vector3>& vert, std::vector<MeshTriangle>& tri);
+
             /**
              * @brief
              *
              * @param liquid
              */
             void setLiquidData(WmoLiquid*& liquid) { iLiquid = liquid; liquid = NULL; }
+
             /**
              * @brief
              *
@@ -219,6 +225,7 @@ namespace VMAP
              * @return bool
              */
             bool IntersectRay(const G3D::Ray& ray, float& distance, bool stopAtFirstHit) const;
+
             /**
              * @brief
              *
@@ -228,6 +235,7 @@ namespace VMAP
              * @return bool
              */
             bool IsInsideObject(const Vector3& pos, const Vector3& down, float& z_dist) const;
+
             /**
              * @brief
              *
@@ -236,12 +244,14 @@ namespace VMAP
              * @return bool
              */
             bool GetLiquidLevel(const Vector3& pos, float& liqHeight) const;
+
             /**
              * @brief
              *
              * @return uint32
              */
             uint32 GetLiquidType() const;
+
             /**
              * @brief
              *
@@ -249,6 +259,7 @@ namespace VMAP
              * @return bool
              */
             bool WriteToFile(FILE* wf);
+
             /**
              * @brief
              *
@@ -256,24 +267,28 @@ namespace VMAP
              * @return bool
              */
             bool ReadFromFile(FILE* rf);
+
             /**
              * @brief
              *
              * @return const G3D::AABox
              */
             const G3D::AABox& GetBound() const { return iBound; }
+
             /**
              * @brief
              *
              * @return uint32
              */
             uint32 GetMogpFlags() const { return iMogpFlags; }
+
             /**
              * @brief
              *
              * @return uint32
              */
             uint32 GetWmoID() const { return iGroupWMOID; }
+
         protected:
             G3D::AABox iBound;  /**< TODO */
             uint32 iMogpFlags;  /**< 0x8 outdor; 0x2000 indoor */
@@ -288,6 +303,7 @@ namespace VMAP
             void getMeshData(std::vector<Vector3>& vertices, std::vector<MeshTriangle>& triangles, WmoLiquid*& liquid);
 #endif
     };
+
     /**
      * @brief Holds a model (converted M2 or WMO) in its original coordinate space
      *
@@ -299,7 +315,7 @@ namespace VMAP
              * @brief
              *
              */
-            WorldModel(): RootWMOID(0) {}
+            WorldModel() : RootWMOID(0), Flags(0) {}
 
             /**
              * @brief pass group models to WorldModel and create BIH. Passed vector is swapped with old geometry!
@@ -307,12 +323,14 @@ namespace VMAP
              * @param models
              */
             void SetGroupModels(std::vector<GroupModel>& models);
+
             /**
              * @brief
              *
              * @param id
              */
             void SetRootWmoID(uint32 id) { RootWMOID = id; }
+
             /**
              * @brief
              *
@@ -322,6 +340,7 @@ namespace VMAP
              * @return bool
              */
             bool IntersectRay(const G3D::Ray& ray, float& distance, bool stopAtFirstHit) const;
+
             /**
              * @brief
              *
@@ -332,6 +351,7 @@ namespace VMAP
              * @return bool
              */
             bool GetAreaInfo(const G3D::Vector3& p, const G3D::Vector3& down, float& dist, AreaInfo& info) const;
+
             /**
              * @brief
              *
@@ -342,6 +362,7 @@ namespace VMAP
              * @return bool
              */
             bool GetLocationInfo(const G3D::Vector3& p, const G3D::Vector3& down, float& dist, LocationInfo& info) const;
+
             /**
              * @brief
              *
@@ -349,6 +370,7 @@ namespace VMAP
              * @return bool
              */
             bool writeFile(const std::string& filename);
+
             /**
              * @brief
              *

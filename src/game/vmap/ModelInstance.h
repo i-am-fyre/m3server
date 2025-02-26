@@ -39,8 +39,7 @@ namespace VMAP
     struct LocationInfo;
 
     /**
-     * @brief
-     *
+     * @brief Enumeration for model flags.
      */
     enum ModelFlags
     {
@@ -50,120 +49,127 @@ namespace VMAP
     };
 
     /**
-     * @brief
-     *
+     * @brief Class representing a model spawn.
      */
     class ModelSpawn
     {
         public:
-            // mapID, tileX, tileY, Flags, ID, Pos, Rot, Scale, Bound_lo, Bound_hi, name
-            uint32 flags; /**< TODO */
-            uint16 adtId; /**< TODO */
-            uint32 ID; /**< TODO */
-            G3D::Vector3 iPos; /**< TODO */
-            G3D::Vector3 iRot; /**< TODO */
-            float iScale; /**< TODO */
-            G3D::AABox iBound; /**< TODO */
-            std::string name; /**< TODO */
+            uint32 flags = 0; /**< Flags for the model spawn. */
+            uint16 adtId = 0; /**< ADT ID for the model spawn. */
+            uint32 ID = 0; /**< ID for the model spawn. */
+            G3D::Vector3 iPos; /**< Position of the model spawn. */
+            G3D::Vector3 iRot; /**< Rotation of the model spawn. */
+            float iScale = 1.0f; /**< Scale of the model spawn. */
+            G3D::AABox iBound; /**< Bounding box of the model spawn. */
+            std::string name; /**< Name of the model spawn. */
+
             /**
-             * @brief
+             * @brief Equality operator for ModelSpawn.
              *
-             * @param other
-             * @return bool operator
+             * @param other The other ModelSpawn to compare with.
+             * @return True if the IDs are equal, false otherwise.
              */
             bool operator==(const ModelSpawn& other) const { return ID == other.ID; }
-            // uint32 hashCode() const { return ID; }
-            // temp?
+
             /**
-             * @brief
+             * @brief Get the bounding box of the model spawn.
              *
-             * @return const G3D::AABox
+             * @return The bounding box of the model spawn.
              */
             const G3D::AABox& getBounds() const { return iBound; }
 
-
             /**
-             * @brief
+             * @brief Read a ModelSpawn from a file.
              *
-             * @param rf
-             * @param spawn
-             * @return bool
+             * @param rf The file to read from.
+             * @param spawn The ModelSpawn to read into.
+             * @return True if successful, false otherwise.
              */
             static bool ReadFromFile(FILE* rf, ModelSpawn& spawn);
+
             /**
-             * @brief
+             * @brief Write a ModelSpawn to a file.
              *
-             * @param rw
-             * @param spawn
-             * @return bool
+             * @param rw The file to write to.
+             * @param spawn The ModelSpawn to write.
+             * @return True if successful, false otherwise.
              */
             static bool WriteToFile(FILE* rw, const ModelSpawn& spawn);
     };
 
     /**
-     * @brief
-     *
+     * @brief Class representing a model instance.
      */
     class ModelInstance: public ModelSpawn
     {
         public:
             /**
-             * @brief
-             *
+             * @brief Default constructor for ModelInstance.
              */
-            ModelInstance(): iModel(0) {}
+            ModelInstance(): iInvScale(1.0f), iModel(0) {}
+
             /**
-             * @brief
+             * @brief Constructor for ModelInstance.
              *
-             * @param spawn
-             * @param model
+             * @param spawn The ModelSpawn to initialize from.
+             * @param model The WorldModel associated with this instance.
              */
             ModelInstance(const ModelSpawn& spawn, WorldModel* model);
+
             /**
-             * @brief
-             *
+             * @brief Set the model instance as unloaded.
              */
             void setUnloaded() { iModel = 0; }
+
             /**
-             * @brief
+             * @brief Check if a ray intersects with the model instance.
              *
-             * @param pRay
-             * @param pMaxDist
-             * @param pStopAtFirstHit
-             * @return bool
+             * @param pRay The ray to check.
+             * @param pMaxDist The maximum distance for the intersection.
+             * @param pStopAtFirstHit Whether to stop at the first hit.
+             * @return True if the ray intersects, false otherwise.
              */
             bool IntersectRay(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit) const;
+
             /**
-             * @brief
+             * @brief Check if a point intersects with the model instance.
              *
-             * @param p
-             * @param info
+             * @param p The point to check.
+             * @param info The area info to update.
              */
             void intersectPoint(const G3D::Vector3& p, AreaInfo& info) const;
+
             /**
-             * @brief
+             * @brief Get the location info for a point.
              *
-             * @param p
-             * @param info
-             * @return bool
+             * @param p The point to check.
+             * @param info The location info to update.
+             * @return True if successful, false otherwise.
              */
             bool GetLocationInfo(const G3D::Vector3& p, LocationInfo& info) const;
+
             /**
-             * @brief
+             * @brief Get the liquid level for a point.
              *
-             * @param p
-             * @param info
-             * @param liqHeight
-             * @return bool
+             * @param p The point to check.
+             * @param info The location info to update.
+             * @param liqHeight The liquid height to update.
+             * @return True if successful, false otherwise.
              */
             bool GetLiquidLevel(const G3D::Vector3& p, LocationInfo& info, float& liqHeight) const;
+
         protected:
-            G3D::Matrix3 iInvRot; /**< TODO */
-            float iInvScale; /**< TODO */
-            WorldModel* iModel; /**< TODO */
+            G3D::Matrix3 iInvRot; /**< Inverse rotation matrix for the model instance. */
+            float iInvScale; /**< Inverse scale for the model instance. */
+            WorldModel* iModel; /**< Pointer to the WorldModel associated with this instance. */
 
 #ifdef MMAP_GENERATOR
         public:
+            /**
+             * @brief Get the WorldModel associated with this instance.
+             *
+             * @return The WorldModel associated with this instance.
+             */
             WorldModel* const getWorldModel();
 #endif
     };
