@@ -34,10 +34,10 @@ add_executable(map-extractor
     map-extractor/assembler.cpp
     map-extractor/dbcfile.cpp
     map-extractor/dbcfile.h
-    #map-extractor/adtfile.cpp
-    #map-extractor/adtfile.h
-    #map-extractor/wdtfile.cpp
-    #map-extractor/wdtfile.h
+    map-extractor/adtfile.cpp
+    map-extractor/adtfile.h
+    map-extractor/wdtfile.cpp
+    map-extractor/wdtfile.h
     map-extractor/wmo.cpp
     map-extractor/wmo.h
     map-extractor/model.cpp
