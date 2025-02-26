@@ -41,9 +41,11 @@ add_executable(map-extractor
     map-extractor/wmo.cpp
     map-extractor/wmo.h
     map-extractor/model.cpp
-    #map-extractor/model.h
+    map-extractor/model.h
     map-extractor/modelheaders.h
     map-extractor/vec3d.h
+    ../../game/vmap/TileAssembler.h
+    ../../game/vmap/TileAssembler.cpp
     ${SHARED_SRCS}
     $<$<BOOL:${WIN32}>:map-extractor/map-extractor.rc>
 )
@@ -51,6 +53,7 @@ add_executable(map-extractor
 target_include_directories(map-extractor
     PUBLIC
         shared
+        vmap2
         map-extractor
 )
 
@@ -58,12 +61,12 @@ target_link_libraries(map-extractor
     PUBLIC
     loadlib
     shared
-    vmap2
     RecastNavigation::Recast
     Threads::Threads
-    ${OPENSSL_LIBRARIES}
-#if (defined(OPENSSL_VERSION_MAJOR) && OPENSSL_VERSION_MAJOR >= 3)
-    OpenSSL::Crypto
+    g3dlite
+    RecastNavigation::Detour
+    vmap2
+
 #endif()
 )
 
@@ -79,51 +82,41 @@ if(WIN32 AND MSVC)
         OPTIONAL)
 endif()
 
-#=======================================================#
-#vmap-extractor
-#=======================================================#
-add_executable(vmap-extractor
-    vmap-extractor/adtfile.cpp
-    vmap-extractor/adtfile.h
-    vmap-extractor/dbcfile.cpp
-    vmap-extractor/dbcfile.h
-    vmap-extractor/assembler.cpp
-    vmap-extractor/model.cpp
-    vmap-extractor/model.h
-    vmap-extractor/modelheaders.h
-    vmap-extractor/vec3d.h
-    vmap-extractor/vmapexport.cpp
-    vmap-extractor/wdtfile.cpp
-    vmap-extractor/wdtfile.h
-    vmap-extractor/wmo.cpp
-    vmap-extractor/wmo.h
-    ${SHARED_SRCS}
-    $<$<BOOL:${WIN32}>:vmap-extractor/vmap-extractor.rc>
+if(NOT BUILD_MANGOSD)
+if(BUILD_TOOLS)
+add_library(vmap2 STATIC
+    ../../game/vmap/BIH.cpp
+    ../../game/vmap/VMapManager2.cpp
+    ../../game/vmap/MapTree.cpp
+    ../../game/vmap/TileAssembler.cpp
+    ../../game/vmap/WorldModel.cpp
+    ../../game/vmap/ModelInstance.cpp
+    ../../game/vmap/BIH.h
+    ../../game/vmap/VMapManager2.h
+    ../../game/vmap/MapTree.h
+    ../../game/vmap/TileAssembler.h
+    ../../game/vmap/WorldModel.h
+    ../../game/vmap/ModelInstance.h
 )
 
-target_include_directories(vmap-extractor
+target_include_directories(vmap2
+    PUBLIC
+        ../../game/vmap
+        ../../game/WorldHandlers
+)
+
+target_compile_definitions(vmap2
+    PUBLIC
+        MMAP_GENERATOR
+        NO_CORE_FUNCS
+)
+target_link_libraries(vmap2
     PUBLIC
         shared
-        vmap-extractor
+        g3dlite
+        RecastNavigation::Detour
 )
-
-target_link_libraries(vmap-extractor
-    PUBLIC
-        loadlib
-        vmap2
-)
-
-install(
-    TARGETS vmap-extractor
-    DESTINATION ${BIN_DIR}/${TOOLS_DIR}
-)
-
-if(WIN32 AND MSVC)
-    install(
-        FILES $<TARGET_PDB_FILE:vmap-extractor>
-        DESTINATION ${BIN_DIR}/${TOOLS_DIR}
-        OPTIONAL
-)
+endif()
 endif()
 
 #=======================================================#
