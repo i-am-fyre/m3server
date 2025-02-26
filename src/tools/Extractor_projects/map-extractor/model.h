@@ -90,40 +90,40 @@ class Model
 };
 
 /**
- * @brief
- *
+ * @brief Represents an instance of a model in the game world.
  */
 class ModelInstance
 {
     public:
-        Model* model; /**< TODO */
+        Model* model = nullptr; /**< Pointer to the model associated with this instance. */
 
-        uint32 id; /**< TODO */
-        Vec3D pos, rot; /**< TODO */
-        unsigned int d1;
-        float w, sc;
-        unsigned int scaleZeroOnly;
+        uint32 id = 0; /**< Unique identifier for the model instance. */
+        Vec3D pos, rot; /**< Position and rotation of the model instance in the game world. */
+        unsigned int d1 = 0; /**< Unknown data field. */
+        float w = 0.0f, sc = 0.0f; /**< Width and scale of the model instance. */
+        unsigned int scaleZeroOnly = 0; /**< Scale value used only for zero scale. */
         //unsigned int scale; // This line introduced a regression bug in Mangos Zero, is Fine for other cores.
-        uint16 scaleOthers;
-        std::string szWorkDirWmo;
+        uint16 scaleOthers = 0; /**< Scale value for other cores. */
+        std::string szWorkDirWmo; /**< Working directory for WMO files. */
 
         /**
-         * @brief
-         *
+         * @brief Default constructor for ModelInstance.
          */
-        ModelInstance() {}
+        ModelInstance() : d1(0) {}
+
         /**
-         * @brief
+         * @brief Constructs a ModelInstance from an MPQ file.
          *
-         * @param f
-         * @param ModelInstName
-         * @param mapID
-         * @param tileX
-         * @param tileY
-         * @param pDirfile
+         * @param f Reference to the MPQ file.
+         * @param ModelInstName Name of the model instance.
+         * @param mapID ID of the map.
+         * @param tileX X coordinate of the tile.
+         * @param tileY Y coordinate of the tile.
+         * @param pDirfile Pointer to the directory file.
+         * @param iCoreNumber Core number.
+         * @param szWorkDirWmo Working directory for WMO files.
          */
         ModelInstance(MPQFile& f, std::string& ModelInstName, uint32 mapID, uint32 tileX, uint32 tileY, FILE* pDirfile, int iCoreNumber, std::string szWorkDirWmo);
-
 };
 
 /**

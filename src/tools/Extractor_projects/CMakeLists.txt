@@ -44,8 +44,6 @@ add_executable(map-extractor
     #map-extractor/model.h
     map-extractor/modelheaders.h
     map-extractor/vec3d.h
-    #map-extractor/vmapexport.cpp
-    #map-extractor/vmapexport.h
     ${SHARED_SRCS}
     $<$<BOOL:${WIN32}>:map-extractor/map-extractor.rc>
 )

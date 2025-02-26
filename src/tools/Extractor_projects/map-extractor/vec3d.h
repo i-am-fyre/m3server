@@ -29,35 +29,34 @@
 #include <cmath>
 
 /**
- * @brief
- *
+ * @brief Class representing a 3D vector.
  */
 class Vec3D
 {
     public:
-        float x, y, z; /**< TODO */
+        float x, y, z; /**< The x, y, and z coordinates of the vector. */
 
         /**
-         * @brief
+         * @brief Constructs a Vec3D object with given coordinates.
          *
-         * @param x0
-         * @param y0
-         * @param z0
+         * @param x0 The x coordinate.
+         * @param y0 The y coordinate.
+         * @param z0 The z coordinate.
          */
         Vec3D(float x0 = 0.0f, float y0 = 0.0f, float z0 = 0.0f) : x(x0), y(y0), z(z0) {}
 
         /**
-         * @brief
+         * @brief Copy constructor.
          *
-         * @param v
+         * @param v The vector to copy.
          */
         Vec3D(const Vec3D& v) : x(v.x), y(v.y), z(v.z) {}
 
         /**
-         * @brief
+         * @brief Assignment operator.
          *
-         * @param v
-         * @return Vec3D &operator
+         * @param v The vector to assign.
+         * @return Reference to the assigned vector.
          */
         Vec3D& operator= (const Vec3D& v)
         {
@@ -68,10 +67,10 @@ class Vec3D
         }
 
         /**
-         * @brief
+         * @brief Adds two vectors.
          *
-         * @param v
-         * @return Vec3D operator
+         * @param v The vector to add.
+         * @return The resulting vector.
          */
         Vec3D operator+ (const Vec3D& v) const
         {
@@ -80,10 +79,10 @@ class Vec3D
         }
 
         /**
-         * @brief
+         * @brief Subtracts two vectors.
          *
-         * @param v
-         * @return Vec3D operator
+         * @param v The vector to subtract.
+         * @return The resulting vector.
          */
         Vec3D operator- (const Vec3D& v) const
         {
@@ -92,10 +91,10 @@ class Vec3D
         }
 
         /**
-         * @brief
+         * @brief Dot product of two vectors.
          *
-         * @param v
-         * @return float operator
+         * @param v The vector to dot with.
+         * @return The dot product.
          */
         float operator* (const Vec3D& v) const
         {
@@ -103,10 +102,10 @@ class Vec3D
         }
 
         /**
-         * @brief
+         * @brief Multiplies the vector by a scalar.
          *
-         * @param d
-         * @return Vec3D operator
+         * @param d The scalar to multiply by.
+         * @return The resulting vector.
          */
         Vec3D operator* (float d) const
         {
@@ -115,11 +114,11 @@ class Vec3D
         }
 
         /**
-         * @brief
+         * @brief Friend function to multiply a scalar by a vector.
          *
-         * @param d
-         * @param v
-         * @return Vec3D operator
+         * @param d The scalar to multiply by.
+         * @param v The vector to multiply.
+         * @return The resulting vector.
          */
         friend Vec3D operator* (float d, const Vec3D& v)
         {
@@ -127,10 +126,10 @@ class Vec3D
         }
 
         /**
-         * @brief
+         * @brief Cross product of two vectors.
          *
-         * @param v
-         * @return Vec3D operator
+         * @param v The vector to cross with.
+         * @return The resulting vector.
          */
         Vec3D operator% (const Vec3D& v) const
         {
@@ -139,10 +138,10 @@ class Vec3D
         }
 
         /**
-         * @brief
+         * @brief Adds another vector to this vector.
          *
-         * @param v
-         * @return Vec3D &operator
+         * @param v The vector to add.
+         * @return Reference to the resulting vector.
          */
         Vec3D& operator+= (const Vec3D& v)
         {
@@ -153,10 +152,10 @@ class Vec3D
         }
 
         /**
-         * @brief
+         * @brief Subtracts another vector from this vector.
          *
-         * @param v
-         * @return Vec3D &operator
+         * @param v The vector to subtract.
+         * @return Reference to the resulting vector.
          */
         Vec3D& operator-= (const Vec3D& v)
         {
@@ -167,10 +166,10 @@ class Vec3D
         }
 
         /**
-         * @brief
+         * @brief Multiplies this vector by a scalar.
          *
-         * @param d
-         * @return Vec3D &operator
+         * @param d The scalar to multiply by.
+         * @return Reference to the resulting vector.
          */
         Vec3D& operator*= (float d)
         {
@@ -181,9 +180,9 @@ class Vec3D
         }
 
         /**
-         * @brief
+         * @brief Calculates the squared length of the vector.
          *
-         * @return float
+         * @return The squared length.
          */
         float lengthSquared() const
         {
@@ -191,9 +190,9 @@ class Vec3D
         }
 
         /**
-         * @brief
+         * @brief Calculates the length of the vector.
          *
-         * @return float
+         * @return The length.
          */
         float length() const
         {
@@ -201,9 +200,9 @@ class Vec3D
         }
 
         /**
-         * @brief
+         * @brief Normalizes the vector.
          *
-         * @return Vec3D
+         * @return Reference to the normalized vector.
          */
         Vec3D& normalize()
         {
@@ -212,9 +211,9 @@ class Vec3D
         }
 
         /**
-         * @brief
+         * @brief Returns a normalized copy of the vector.
          *
-         * @return Vec3D operator
+         * @return The normalized vector.
          */
         Vec3D operator~() const
         {
@@ -224,11 +223,11 @@ class Vec3D
         }
 
         /**
-         * @brief
+         * @brief Input stream operator for Vec3D.
          *
-         * @param in
-         * @param v
-         * @return std::istream &operator >>
+         * @param in The input stream.
+         * @param v The vector to read into.
+         * @return Reference to the input stream.
          */
         friend std::istream& operator>>(std::istream& in, Vec3D& v)
         {
@@ -237,11 +236,11 @@ class Vec3D
         }
 
         /**
-         * @brief
+         * @brief Output stream operator for Vec3D.
          *
-         * @param out
-         * @param v
-         * @return std::ostream &operator
+         * @param out The output stream.
+         * @param v The vector to write.
+         * @return Reference to the output stream.
          */
         friend std::ostream& operator<<(std::ostream& out, const Vec3D& v)
         {
@@ -250,9 +249,9 @@ class Vec3D
         }
 
         /**
-         * @brief
+         * @brief Conversion operator to float pointer.
          *
-         * @return operator float
+         * @return Pointer to the vector's data.
          */
         operator float* ()
         {
@@ -261,13 +260,13 @@ class Vec3D
 };
 
 /**
- * @brief
+ * @brief Rotates a point around another point by a given angle.
  *
- * @param x0
- * @param y0
- * @param x
- * @param y
- * @param angle
+ * @param x0 The x coordinate of the center point.
+ * @param y0 The y coordinate of the center point.
+ * @param x The x coordinate of the point to rotate.
+ * @param y The y coordinate of the point to rotate.
+ * @param angle The angle to rotate by.
  */
 inline void rotate(float x0, float y0, float* x, float* y, float angle)
 {
@@ -277,11 +276,12 @@ inline void rotate(float x0, float y0, float* x, float* y, float angle)
 }
 
 /**
- * @brief for whatever reason a certain company just can't stick to one coordinate system...
+ * @brief Fixes the coordinates of a vector by swapping its components.
  *
- * @param v
- * @return Vec3D
+ * @param v The vector to fix.
+ * @return The fixed vector.
  */
 inline Vec3D fixCoords(const Vec3D& v) { return Vec3D(v.z, v.x, v.y); }
 
-#endif
+#endif // VEC3D_H
+

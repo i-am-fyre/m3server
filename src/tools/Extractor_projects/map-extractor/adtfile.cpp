@@ -27,21 +27,42 @@
 #include "adtfile.h"
 #include <ExtractorCommon.h>
 
-ADTFile::ADTFile(std::string filename): AdtFilename(filename)
+/**
+ * @brief Constructs an ADTFile object with the given filename.
+ *
+ * @param filename The name of the ADT file.
+ */
+ADTFile::ADTFile(std::string filename) : AdtFilename(filename), ModelInstansName(nullptr)
 {
 }
 
-bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failedPaths,int iCoreNumber, std::string szRawVMAPMagic, bool preciseVectorData, std::string szWorkDirWmo)
+/**
+ * @brief Initializes the ADT file.
+ *
+ * @param map_num The map number.
+ * @param tileX The X coordinate of the tile.
+ * @param tileY The Y coordinate of the tile.
+ * @param failedPaths The set of failed paths.
+ * @param iCoreNumber The core number.
+ * @param szRawVMAPMagic The VMAP magic string.
+ * @param preciseVectorData Whether to use precise vector data.
+ * @param szWorkDirWmo The working directory for WMO files.
+ * @return True if the initialization was successful, false otherwise.
+ */
+bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failedPaths, int iCoreNumber, std::string szRawVMAPMagic, bool preciseVectorData, std::string szWorkDirWmo)
 {
     HANDLE adtHandle;
 
+    // Open the newest ADT file.
     if (!OpenNewestFile(AdtFilename.c_str(), &adtHandle))
     {
         printf("Error initializing ADT %s\n", AdtFilename.c_str());
     }
 
+    // Create an MPQFile object for the ADT file.
     MPQFile ADT(adtHandle, AdtFilename.c_str());
 
+    // Check if the ADT file is empty.
     if (ADT.isEof())
     {
         return false;
@@ -53,9 +74,11 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failed
     std::string yMap;
     std::string filename = AdtFilename;
 
+    // Remove the ".adt" extension from the filename.
     filename.erase(filename.find(".adt"), 4);
     std::string TempMapNumber;
 
+    // Extract the map coordinates from the filename.
     TempMapNumber = filename.substr(filename.length() - 6, 6);
     xMap = TempMapNumber.substr(TempMapNumber.find("_") + 1, (TempMapNumber.find_last_of("_") - 1) - (TempMapNumber.find("_")));
     yMap = TempMapNumber.substr(TempMapNumber.find_last_of("_") + 1, (TempMapNumber.length()) - (TempMapNumber.find_last_of("_")));
@@ -63,6 +86,7 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failed
 
     std::string AdtMapNumber = xMap + ' ' + yMap + ' ' + GetUniformName(filename);
 
+    // Open the directory file for writing.
     std::string dirname = std::string(szWorkDirWmo) + "/dir_bin";
     FILE* dirfile;
     dirfile = fopen(dirname.c_str(), "ab");
@@ -72,6 +96,7 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failed
         return false;
     }
 
+    // Read the ADT file and process its chunks.
     while (!ADT.isEof())
     {
         char fourcc[5];
@@ -84,43 +109,78 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failed
 
         if (!strcmp(fourcc, "MCIN"))
         {
+            // Process MCIN chunk.
         }
         else if (!strcmp(fourcc, "MTEX"))
         {
+            // Process MTEX chunk.
         }
         else if (!strcmp(fourcc, "MMDX"))
         {
+            // Process MMDX chunk.
             if (size)
             {
                 char* buf = new char[size];
                 ADT.read(buf, size);
                 char* p = buf;
                 int t = 0;
-                ModelInstansName = new std::string[size];
+                int numStrings = 0;
+
+                // Count the number of strings in the buffer
                 while (p < buf + size)
                 {
-                    std::string path(p);                         // Store copy after name fixed
-                    std::string uName;
-                    ExtractSingleModel(path, uName, failedPaths, iCoreNumber, szRawVMAPMagic, preciseVectorData, szWorkDirWmo);
-                    ModelInstansName[t++] = uName;
+                    numStrings++;
                     p = p + strlen(p) + 1;
+                }
+
+                // Allocate the correct number of strings
+                ModelInstansName = new std::string[numStrings];
+                p = buf;
+
+                for (int i = 0; i < numStrings; ++i)
+                {
+                   std::string path(p); // Store copy after name fixed
+                   std::string uName;
+                   ExtractSingleModel(path, uName, failedPaths, iCoreNumber, szRawVMAPMagic, preciseVectorData, szWorkDirWmo);
+                   ModelInstansName[i] = uName;
+                   p = p + strlen(p) + 1;
                 }
                 delete[] buf;
             }
         }
         else if (!strcmp(fourcc, "MWMO"))
         {
+            // Process MWMO chunk.
             if (size)
             {
                 char* buf = new char[size];
                 ADT.read(buf, size);
                 char* p = buf;
                 int q = 0;
-                WmoInstansName = new std::string[size];
+
+                // Count the number of strings in the buffer
+                int numStrings = 0;
+                while (p < buf + size)
+                {
+                    numStrings++;
+                    p = p + strlen(p) + 1;
+                }
+
+                // Allocate the correct number of strings
+                WmoInstansName = new std::string[numStrings];
+                p = buf;
+
                 while (p < buf + size)
                 {
                     std::string path(p);
-                    WmoInstansName[q++] = GetUniformName(path);
+                    if (q < nWMO)
+                    {
+                        WmoInstansName[q++] = GetUniformName(path);
+                    }
+                    else
+                    {
+                        printf("Error: Attempt to write beyond allocated WmoInstansName array.\n");
+                    }
                     p = p + strlen(p) + 1;
                 }
                 delete[] buf;
@@ -129,6 +189,7 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failed
         //======================
         else if (!strcmp(fourcc, "MDDF"))
         {
+            // Process MDDF chunk.
             if (size)
             {
                 nMDX = (int)size / 36;
@@ -143,6 +204,7 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failed
         }
         else if (!strcmp(fourcc, "MODF"))
         {
+            // Process MODF chunk.
             if (size)
             {
                 nWMO = (int)size / 64;
@@ -164,6 +226,10 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failed
     return true;
 }
 
+/**
+ * @brief Destroys the ADTFile object.
+ */
 ADTFile::~ADTFile()
 {
 }
+

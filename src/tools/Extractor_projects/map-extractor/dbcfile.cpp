@@ -29,6 +29,11 @@
 
 #include <cstdio>
 
+/**
+ * @brief Constructor that initializes a DBCFile object with a filename.
+ *
+ * @param filename The name of the DBC file.
+ */
 DBCFile::DBCFile(const std::string& filename):
     filename(filename),
     fileHandle(NULL),
@@ -41,29 +46,41 @@ DBCFile::DBCFile(const std::string& filename):
 {
 }
 
-DBCFile::DBCFile(HANDLE file) 
-    : fileHandle(file), 
-      data(0), 
-      recordSize(0), 
-      recordCount(0), 
-      fieldCount(0), 
-      stringSize(0), 
-      stringTable(0) 
+/**
+ * @brief Constructor that initializes a DBCFile object with a file handle.
+ *
+ * @param file The handle to the DBC file.
+ */
+DBCFile::DBCFile(HANDLE file)
+    : fileHandle(file),
+      data(0),
+      recordSize(0),
+      recordCount(0),
+      fieldCount(0),
+      stringSize(0),
+      stringTable(0)
 {
 }
 
+/**
+ * @brief Opens the DBC file and reads its header and data.
+ *
+ * @return true if the file was successfully opened and read, false otherwise.
+ */
 bool DBCFile::open()
 {
     unsigned char header[4];
     unsigned int na, nb, es, ss;
 
-    if (!SFileReadFile(fileHandle, header, 4, NULL, NULL))              // Magic header
+    // Read the magic header
+    if (!SFileReadFile(fileHandle, header, 4, NULL, NULL))
     {
         SFileCloseFile(fileHandle);
         printf("Could not read header in DBCFile %s. err=%u\n", filename.c_str(), GetLastError());
         return false;
     }
 
+    // Check if the header matches "WDBC"
     if (header[0] != 'W' || header[1] != 'D' || header[2] != 'B' || header[3] != 'C')
     {
         SFileCloseFile(fileHandle);
@@ -71,38 +88,45 @@ bool DBCFile::open()
         return false;
     }
 
-    if (!SFileReadFile(fileHandle, &na, 4, NULL, NULL))                 // Number of records
+    // Read the number of records
+    if (!SFileReadFile(fileHandle, &na, 4, NULL, NULL))
     {
         SFileCloseFile(fileHandle);
         printf("Could not read number of records from DBCFile %s. err=%u\n", filename.c_str(), GetLastError());
         return false;
     }
 
-    if (!SFileReadFile(fileHandle, &nb, 4, NULL, NULL))                 // Number of fields
+    // Read the number of fields
+    if (!SFileReadFile(fileHandle, &nb, 4, NULL, NULL))
     {
         SFileCloseFile(fileHandle);
         printf("Could not read number of fields from DBCFile %s. err=%u\n", filename.c_str(), GetLastError());
         return false;
     }
 
-    if (!SFileReadFile(fileHandle, &es, 4, NULL, NULL))                 // Size of a record
+    // Read the size of a record
+    if (!SFileReadFile(fileHandle, &es, 4, NULL, NULL))
     {
         SFileCloseFile(fileHandle);
         printf("Could not read record size from DBCFile %s. err=%u\n", filename.c_str(), GetLastError());
         return false;
     }
 
-    if (!SFileReadFile(fileHandle, &ss, 4, NULL, NULL))                 // String size
+    // Read the string block size
+    if (!SFileReadFile(fileHandle, &ss, 4, NULL, NULL))
     {
         SFileCloseFile(fileHandle);
         printf("Could not read string block size from DBCFile %s. err=%u\n", filename.c_str(), GetLastError());
         return false;
     }
 
+    // Set the class members
     recordSize = es;
     recordCount = na;
     fieldCount = nb;
     stringSize = ss;
+
+    // Check if the field count matches the record size
     if (fieldCount * 4 != recordSize)
     {
         SFileCloseFile(fileHandle);
@@ -110,11 +134,13 @@ bool DBCFile::open()
         return false;
     }
 
+    // Allocate memory for the data and string table
     data = new unsigned char[recordSize * recordCount + stringSize];
     stringTable = data + recordSize * recordCount;
 
     size_t data_size = recordSize * recordCount + stringSize;
 
+    // Read the data and string table
     if (!SFileReadFile(fileHandle, data, data_size, NULL, NULL))
     {
         SFileCloseFile(fileHandle);
@@ -125,17 +151,32 @@ bool DBCFile::open()
     SFileCloseFile(fileHandle);
     return true;
 }
+
+/**
+ * @brief Destructor that cleans up the allocated memory.
+ */
 DBCFile::~DBCFile()
 {
     delete [] data;
 }
 
+/**
+ * @brief Gets a record by its ID.
+ *
+ * @param id The ID of the record.
+ * @return The record.
+ */
 DBCFile::Record DBCFile::getRecord(size_t id)
 {
     assert(data);
     return Record(*this, data + id * recordSize);
 }
 
+/**
+ * @brief Gets the maximum ID of the records.
+ *
+ * @return The maximum ID.
+ */
 size_t DBCFile::getMaxId()
 {
     assert(data);
@@ -151,12 +192,22 @@ size_t DBCFile::getMaxId()
     return maxId;
 }
 
+/**
+ * @brief Gets an iterator to the beginning of the records.
+ *
+ * @return The iterator.
+ */
 DBCFile::Iterator DBCFile::begin()
 {
     assert(data);
     return Iterator(*this, data);
 }
 
+/**
+ * @brief Gets an iterator to the end of the records.
+ *
+ * @return The iterator.
+ */
 DBCFile::Iterator DBCFile::end()
 {
     assert(data);

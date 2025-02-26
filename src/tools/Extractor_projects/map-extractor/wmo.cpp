@@ -36,16 +36,30 @@
 extern uint16* LiqType;
 extern ArchiveSet gOpenArchives;
 
-WMORoot::WMORoot(std::string& filename) : filename(filename)
+/**
+ * @brief Constructor for WMORoot class.
+ *
+ * @param filename The name of the WMO root file.
+ */
+WMORoot::WMORoot(std::string& filename)
+    : filename(filename), nTextures(0), nGroups(0), nP(0), nLights(0), nModels(0), nDoodads(0), nDoodadSets(0), RootWMOID(0), liquidType(0), col(0)
 {
+    std::fill(std::begin(bbcorn1), std::end(bbcorn1), 0.0f);
+    std::fill(std::begin(bbcorn2), std::end(bbcorn2), 0.0f);
 }
 
+/**
+ * @brief Opens the WMO root file and reads its contents.
+ *
+ * @return true if the file was successfully opened and read, false otherwise.
+ */
 bool WMORoot::open()
 {
     HANDLE mpqFile;
     if (!OpenNewestFile(filename.c_str(), &mpqFile))
     {
         printf("Error opening WMO Root %s\n", filename.c_str());
+        return false;
     }
     MPQFile f(mpqFile, filename.c_str());
     if (f.isEof())
@@ -55,7 +69,7 @@ bool WMORoot::open()
     }
 
     uint32 size;
-    char fourcc[5];
+    char fourcc[5] = {0};
 
     while (!f.isEof())
     {
@@ -83,57 +97,21 @@ bool WMORoot::open()
             f.read(&liquidType, 4);
             break;
         }
-        /*
-        else if (!strcmp(fourcc,"MOTX"))
-        {
-        }
-        else if (!strcmp(fourcc,"MOMT"))
-        {
-        }
-        else if (!strcmp(fourcc,"MOGN"))
-        {
-        }
-        else if (!strcmp(fourcc,"MOGI"))
-        {
-        }
-        else if (!strcmp(fourcc,"MOLT"))
-        {
-        }
-        else if (!strcmp(fourcc,"MODN"))
-        {
-        }
-        else if (!strcmp(fourcc,"MODS"))
-        {
-        }
-        else if (!strcmp(fourcc,"MODD"))
-        {
-        }
-        else if (!strcmp(fourcc,"MOSB"))
-        {
-        }
-        else if (!strcmp(fourcc,"MOPV"))
-        {
-        }
-        else if (!strcmp(fourcc,"MOPT"))
-        {
-        }
-        else if (!strcmp(fourcc,"MOPR"))
-        {
-        }
-        else if (!strcmp(fourcc,"MFOG"))
-        {
-        }
-        */
         f.seek((int)nextpos);
     }
     f.close();
     return true;
 }
 
+/**
+ * @brief Converts the WMO root file to VMAP format.
+ *
+ * @param pOutfile The output file to write the VMAP data to.
+ * @param szRawVMAPMagic The VMAP magic string.
+ * @return true if the conversion was successful, false otherwise.
+ */
 bool WMORoot::ConvertToVMAPRootWmo(FILE* pOutfile, std::string szRawVMAPMagic)
 {
-    //printf("Convert RootWmo...\n");
-
     fwrite(szRawVMAPMagic.c_str(), 1, 8, pOutfile);
     unsigned int nVectors = 0;
     fwrite(&nVectors, sizeof(nVectors), 1, pOutfile); // will be filled later
@@ -142,15 +120,30 @@ bool WMORoot::ConvertToVMAPRootWmo(FILE* pOutfile, std::string szRawVMAPMagic)
     return true;
 }
 
+/**
+ * @brief Destructor for WMORoot class.
+ */
 WMORoot::~WMORoot()
 {
 }
 
-WMOGroup::WMOGroup(std::string& filename) : filename(filename),
-    MOPY(0), MOVI(0), MoviEx(0), MOVT(0), MOBA(0), MobaEx(0), hlq(0), LiquEx(0), LiquBytes(0)
+/**
+ * @brief Constructor for WMOGroup class.
+ *
+ * @param filename The name of the WMO group file.
+ */
+WMOGroup::WMOGroup(std::string& filename)
+    : filename(filename), MOPY(nullptr), MOVI(nullptr), MoviEx(nullptr), MOVT(nullptr), MOBA(nullptr), MobaEx(nullptr), hlq(nullptr), LiquEx(nullptr), LiquBytes(nullptr),
+      nVertices(0), nTriangles(0), nBatchA(0), nBatchB(0), nBatchC(0), mopy_size(0), moba_size(0), LiquEx_size(0), liquflags(0), groupName(0), descGroupName(0), mogpFlags(0),
+      moprIdx(0), moprNItems(0), fogIdx(0), liquidType(0), groupWMOID(0)
 {
 }
 
+/**
+ * @brief Opens the WMO group file and reads its contents.
+ *
+ * @return true if the file was successfully opened and read, false otherwise.
+ */
 bool WMOGroup::open()
 {
     HANDLE mpqHandle;
@@ -158,6 +151,7 @@ bool WMOGroup::open()
     if (!OpenNewestFile(filename.c_str(), &mpqHandle))
     {
         printf("Error opening WMOGroup %s\n", filename.c_str());
+        return false;
     }
 
     MPQFile f(mpqHandle, filename.c_str());
@@ -167,7 +161,7 @@ bool WMOGroup::open()
         return false;
     }
     uint32 size;
-    char fourcc[5];
+    char fourcc[5] = {0};
     while (!f.isEof())
     {
         f.read(fourcc, 4);
@@ -240,13 +234,6 @@ bool WMOGroup::open()
             int nLiquBytes = hlq->xtiles * hlq->ytiles;
             LiquBytes = new char[nLiquBytes];
             f.read(LiquBytes, nLiquBytes);
-
-            /* std::ofstream llog("Buildings/liquid.log", ios_base::out | ios_base::app);
-            llog << filename;
-            llog << "\nbbox: " << bbcorn1[0] << ", " << bbcorn1[1] << ", " << bbcorn1[2] << " | " << bbcorn2[0] << ", " << bbcorn2[1] << ", " << bbcorn2[2];
-            llog << "\nlpos: " << hlq->pos_x << ", " << hlq->pos_y << ", " << hlq->pos_z;
-            llog << "\nx-/yvert: " << hlq->xverts << "/" << hlq->yverts << " size: " << size << " expected size: " << 30 + hlq->xverts*hlq->yverts*8 + hlq->xtiles*hlq->ytiles << std::endl;
-            llog.close(); */
         }
         f.seek((int)nextpos);
     }
@@ -254,6 +241,15 @@ bool WMOGroup::open()
     return true;
 }
 
+/**
+ * @brief Converts the WMO group file to VMAP format.
+ *
+ * @param output The output file to write the VMAP data to.
+ * @param rootWMO The root WMO object.
+ * @param pPreciseVectorData Whether to use precise vector data.
+ * @param iCoreNumber The core number.
+ * @return The number of collision triangles.
+ */
 int WMOGroup::ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPreciseVectorData, int iCoreNumber)
 {
     fwrite(&mogpFlags, sizeof(uint32), 1, output);
@@ -403,11 +399,12 @@ int WMOGroup::ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPrecis
         int check = 3 * nColVertices;
         fwrite(VERT, 4, 3, output);
         for (uint32 i = 0; i < nVertices; ++i)
+        {
             if (IndexRenum[i] >= 0)
             {
                 check -= fwrite(MOVT + 3 * i, sizeof(float), 3, output);
             }
-
+        }
         assert(check == 0);
 
         delete [] MoviEx;
@@ -476,7 +473,7 @@ int WMOGroup::ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPrecis
                         {
                             if (liquidEntry == 1)   // water type
                             {
-                                if (filename.find("coilfang_raid") != string::npos)
+                                if (filename.find("coilfang_raid") != std::string::npos)
                                 {
                                     // set water type to special coilfang raid water
                                     liquidEntry = 41;
@@ -508,7 +505,7 @@ int WMOGroup::ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPrecis
                 case 3:
                     if (iCoreNumber == CLIENT_CLASSIC || iCoreNumber == CLIENT_TBC)
                     {
-                        if ((filename.find("stratholme_raid") != string::npos) || (filename.find("Stratholme_raid") != string::npos))
+                        if ((filename.find("stratholme_raid") != std::string::npos) || (filename.find("Stratholme_raid") != std::string::npos))
                         {
                             liquidEntry = 21;   // Naxxramas slime
                         }
@@ -528,11 +525,6 @@ int WMOGroup::ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPrecis
         }
 
         hlq->type = liquidEntry;
-
-        /* std::ofstream llog("Buildings/liquid.log", ios_base::out | ios_base::app);
-        llog << filename;
-        llog << ":\nliquidEntry: " << liquidEntry << " type: " << hlq->type << " (root:" << rootWMO->liquidType << " group:" << liquidType << ")\n";
-        llog.close(); */
 
         fwrite(hlq, sizeof(WMOLiquidHeader), 1, output);
         // only need height values, the other values are unknown anyway
@@ -560,6 +552,7 @@ WMOGroup::~WMOGroup()
 
 //WmoInstName is in the form MD5/name.wmo
 WMOInstance::WMOInstance(MPQFile& f, std::string& WmoInstName, uint32 mapID, uint32 tileX, uint32 tileY, FILE* pDirfile, std::string szWorkDirWmo)
+    : currx(0), curry(0), d3(0), doodadset(0), indx(0), wmo(nullptr)
 {
     pos = Vec3D(0, 0, 0);
 
@@ -582,7 +575,7 @@ WMOInstance::WMOInstance(MPQFile& f, std::string& WmoInstName, uint32 mapID, uin
     //-----------add_in _dir_file----------------
 
     char tempname[512];
-    sprintf(tempname, "%s/%s", szWorkDirWmo, WmoInstName.c_str());
+    sprintf(tempname, "%s/%s", szWorkDirWmo.c_str(), WmoInstName.c_str());
     FILE* input;
     input = fopen(tempname, "r+b");
 
@@ -635,7 +628,10 @@ WMOInstance::WMOInstance(MPQFile& f, std::string& WmoInstName, uint32 mapID, uin
     uint32 nlen = WmoInstName.length();
     fwrite(&nlen, sizeof(uint32), 1, pDirfile);
     fwrite(WmoInstName.c_str(), sizeof(char), nlen, pDirfile);
+}
 
+void WMOInstance::reset()
+{
 }
 
 bool ExtractSingleWmo(std::string& fname, int iCoreNumber, std::string szRawVMAPMagic, bool preciseVectorData, std::string szWorkDirWmo)

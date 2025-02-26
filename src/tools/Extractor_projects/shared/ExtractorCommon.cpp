@@ -203,6 +203,7 @@ int getBuildNumber(char const* path)
     exit(0);
 }
 
+// List of MPQ files for different WoW clients
 std::vector<std::string> kClassicMPQList
 {
     "patch-2.MPQ",
@@ -290,6 +291,12 @@ std::vector<std::string> kMOPMPQList
     "alternate.MPQ",
 };
 
+/**
+*  This function returns the list of MPQ files for the specified core number
+*
+*  @PARAM coreNumber is the core number of the WoW client
+*  @RETURN kList the list of MPQ files for the specified core number
+*/
 std::vector<std::string> getMPQListForCore(int coreNumber)
 {
     std::vector<std::string> kList;
@@ -315,7 +322,6 @@ std::vector<std::string> getMPQListForCore(int coreNumber)
     }
     return kList;
 }
-
 
 /**
 *  This function looks up the Core Version based in the found build Number
@@ -425,7 +431,6 @@ void showWebsiteBanner()
         "  ____________________________________________________\n"
         );
 }
-
 
 /**
 *  This function returns the .map file 'magic' number based on the core number

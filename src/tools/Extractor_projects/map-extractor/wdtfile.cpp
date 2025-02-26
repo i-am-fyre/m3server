@@ -26,16 +26,37 @@
 #include "wdtfile.h"
 #include <ExtractorCommon.h>
 
-WDTFile::WDTFile(HANDLE handle, char* file_name, char* file_name1): WDT(handle, file_name)
+/**
+ * @brief Constructor for the WDTFile class.
+ *
+ * @param handle Handle to the file.
+ * @param file_name Name of the file.
+ * @param file_name1 Another name of the file.
+ */
+WDTFile::WDTFile(HANDLE handle, char* file_name, char* file_name1)
+    : WDT(handle, file_name), gWmoInstansName(nullptr), gnWMO(0), nMaps(0)
 {
+    // Assign the second file name to the filename member variable
     filename.assign(file_name1);
+
+    // Initialize the mapAreaInfo array with NULL pointers
     for (int i = 0; i < MAP_TILE_SIZE * MAP_TILE_SIZE; i++)
     {
         mapAreaInfo[i] = NULL;
     }
 }
+
+/**
+ * @brief Initializes the WDT file.
+ *
+ * @param map_id ID of the map.
+ * @param mapID Map ID.
+ * @param szWorkDirWmo Working directory for WMO files.
+ * @return true if initialization is successful, false otherwise.
+ */
 bool WDTFile::init(char* map_id, unsigned int mapID, std::string szWorkDirWmo)
 {
+    // Check if the WDT file has reached the end
     if (WDT.isEof())
     {
         //printf("Can't find WDT file.\n");
@@ -45,6 +66,7 @@ bool WDTFile::init(char* map_id, unsigned int mapID, std::string szWorkDirWmo)
     char fourcc[5];
     uint32 size;
 
+    // Create the directory name for WMO files
     std::string dirname = std::string(szWorkDirWmo) + "/dir_bin";
     FILE* dirfile;
     dirfile = fopen(dirname.c_str(), "ab");
@@ -54,16 +76,19 @@ bool WDTFile::init(char* map_id, unsigned int mapID, std::string szWorkDirWmo)
         return false;
     }
 
+    // Read the WDT file until the end
     while (!WDT.isEof())
     {
         WDT.read(fourcc, 4);
         WDT.read(&size, 4);
 
+        // Flip the fourcc characters
         flipcc(fourcc);
         fourcc[4] = 0;
 
         size_t nextpos = WDT.getPos() + size;
 
+        // Process the "MAIN" chunk
         if (!strcmp(fourcc, "MAIN"))
         {
             // Area Info
@@ -73,6 +98,7 @@ bool WDTFile::init(char* map_id, unsigned int mapID, std::string szWorkDirWmo)
                 return false;
             }
 
+            // Read area information for each map tile
             for (int i = 0; i < MAP_TILE_SIZE * MAP_TILE_SIZE; i++)
             {
                 SMAreaInfo* info = new SMAreaInfo();
@@ -81,9 +107,10 @@ bool WDTFile::init(char* map_id, unsigned int mapID, std::string szWorkDirWmo)
                 mapAreaInfo[i] = info;
             }
         }
+        // Process the "MWMO" chunk
         if (!strcmp(fourcc, "MWMO"))
         {
-            // global map objects
+            // Global map objects
             if (size)
             {
                 char* buf = new char[size];
@@ -100,9 +127,10 @@ bool WDTFile::init(char* map_id, unsigned int mapID, std::string szWorkDirWmo)
                 delete[] buf;
             }
         }
+        // Process the "MODF" chunk
         else if (!strcmp(fourcc, "MODF"))
         {
-            // global wmo instance data
+            // Global WMO instance data
             if (size)
             {
                 gnWMO = (int)size / 64;
@@ -120,6 +148,7 @@ bool WDTFile::init(char* map_id, unsigned int mapID, std::string szWorkDirWmo)
                 delete[] gWmoInstansName;
             }
         }
+        // Move to the next position in the WDT file
         WDT.seek((int)nextpos);
     }
 
@@ -127,22 +156,43 @@ bool WDTFile::init(char* map_id, unsigned int mapID, std::string szWorkDirWmo)
     return true;
 }
 
+/**
+ * @brief Destructor for the WDTFile class.
+ */
 WDTFile::~WDTFile(void)
 {
+    // Close the WDT file
     WDT.close();
+
+    // Delete the area information for each map tile
     for (int i = 0; i < MAP_TILE_SIZE * MAP_TILE_SIZE; i++)
     {
         delete mapAreaInfo[i];
     }
 }
 
+/**
+ * @brief Checks if the terrain has an ADT file.
+ *
+ * @param x The x coordinate.
+ * @param y The y coordinate.
+ * @return true if the terrain has an ADT file, false otherwise.
+ */
 bool WDTFile::hasTerrain(int x, int y)
 {
     return (mapAreaInfo[x * MAP_TILE_SIZE + y]->flags & TERRAIN_HAS_ADT);
 }
 
+/**
+ * @brief Gets the ADT file for the specified coordinates.
+ *
+ * @param x The x coordinate.
+ * @param y The y coordinate.
+ * @return A pointer to the ADTFile object.
+ */
 ADTFile* WDTFile::GetMap(int x, int y)
 {
+    // Check if the coordinates are within bounds and if the terrain has an ADT file
     if (!(x >= 0 && y >= 0 && x < 64 && y < 64) || !hasTerrain(y, x))
     {
         return NULL;
@@ -150,6 +200,7 @@ ADTFile* WDTFile::GetMap(int x, int y)
 
     char name[512];
 
+    // Format the ADT file name
     sprintf(name, "World\\Maps\\%s\\%s_%d_%d.adt", filename.c_str(), filename.c_str(), x, y);
     return new ADTFile(name);
 }

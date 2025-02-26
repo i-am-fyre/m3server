@@ -44,185 +44,187 @@
 #define WMO_MATERIAL_WALL_SURFACE    0x40
 
 /**
- * @brief
- *
+ * @brief Represents the root of a WMO (World Map Object) file.
  */
 class WMORoot
 {
     public:
-        uint32 nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, RootWMOID, liquidType; /**< TODO */
-        unsigned int col; /**< TODO */
-        float bbcorn1[3]; /**< TODO */
-        float bbcorn2[3]; /**< TODO */
+        uint32 nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, RootWMOID, liquidType; /**< Various counts and IDs related to the WMO. */
+        unsigned int col; /**< Color or other attribute. */
+        float bbcorn1[3]; /**< Bounding box corner 1. */
+        float bbcorn2[3]; /**< Bounding box corner 2. */
 
         /**
-         * @brief
+         * @brief Constructs a WMORoot object.
          *
-         * @param filename
+         * @param filename The name of the WMO file.
          */
         WMORoot(std::string& filename);
         /**
-         * @brief
-         *
+         * @brief Destroys the WMORoot object.
          */
         ~WMORoot();
 
         /**
-         * @brief
+         * @brief Opens the WMO file.
          *
-         * @return bool
+         * @return True if the file was successfully opened, false otherwise.
          */
         bool open();
         /**
-         * @brief
+         * @brief Converts the WMO root to VMAP format.
          *
-         * @param output
-         * @return bool
+         * @param output The output file.
+         * @param szRawVMAPMagic The VMAP magic string.
+         * @return True if the conversion was successful, false otherwise.
          */
         bool ConvertToVMAPRootWmo(FILE* output, std::string szRawVMAPMagic);
     private:
-        std::string filename; /**< TODO */
+        std::string filename; /**< The name of the WMO file. */
 };
 
 /**
- * @brief
- *
+ * @brief Represents the header of a WMO liquid.
  */
 struct WMOLiquidHeader
 {
-    int xverts, yverts, xtiles, ytiles; /**< TODO */
-    float pos_x; /**< TODO */
-    float pos_y; /**< TODO */
-    float pos_z; /**< TODO */
-    short type; /**< TODO */
+    int xverts, yverts, xtiles, ytiles; /**< Number of vertices and tiles in x and y directions. */
+    float pos_x; /**< X position. */
+    float pos_y; /**< Y position. */
+    float pos_z; /**< Z position. */
+    short type; /**< Type of liquid. */
 };
 
 /**
- * @brief
- *
+ * @brief Represents a vertex in a WMO liquid.
  */
 struct WMOLiquidVert
 {
-    uint16 unk1; /**< TODO */
-    uint16 unk2; /**< TODO */
-    float height; /**< TODO */
+    uint16 unk1; /**< Unknown attribute 1. */
+    uint16 unk2; /**< Unknown attribute 2. */
+    float height; /**< Height of the vertex. */
 };
 
 /**
- * @brief
- *
+ * @brief Represents a group within a WMO file.
  */
 class WMOGroup
 {
     public:
         // MOGP
-        int groupName, descGroupName, mogpFlags; /**< TODO */
-        float bbcorn1[3]; /**< TODO */
-        float bbcorn2[3]; /**< TODO */
-        uint16 moprIdx; /**< TODO */
-        uint16 moprNItems; /**< TODO */
-        uint16 nBatchA; /**< TODO */
-        uint16 nBatchB; /**< TODO */
-        uint32 nBatchC, fogIdx, liquidType, groupWMOID; /**< TODO */
+        int groupName, descGroupName, mogpFlags; /**< Group name, description, and flags. */
+        float bbcorn1[3]; /**< Bounding box corner 1. */
+        float bbcorn2[3]; /**< Bounding box corner 2. */
+        uint16 moprIdx; /**< MOPR index. */
+        uint16 moprNItems; /**< Number of MOPR items. */
+        uint16 nBatchA; /**< Number of batch A items. */
+        uint16 nBatchB; /**< Number of batch B items. */
+        uint32 nBatchC, fogIdx, liquidType, groupWMOID; /**< Number of batch C items, fog index, liquid type, and group WMO ID. */
 
-        int mopy_size, moba_size; /**< TODO */
-        int LiquEx_size; /**< TODO */
-        unsigned int nVertices; /**< number when loaded */
-        int nTriangles; /**< number when loaded */
-        char* MOPY; /**< TODO */
-        uint16* MOVI; /**< TODO */
-        uint16* MoviEx; /**< TODO */
-        float* MOVT; /**< TODO */
-        uint16* MOBA; /**< TODO */
-        int* MobaEx; /**< TODO */
-        WMOLiquidHeader* hlq; /**< TODO */
-        WMOLiquidVert* LiquEx; /**< TODO */
-        char* LiquBytes; /**< TODO */
-        uint32 liquflags; /**< TODO */
+        int mopy_size, moba_size; /**< Sizes of MOPY and MOBA. */
+        int LiquEx_size; /**< Size of LiquEx. */
+        unsigned int nVertices; /**< Number of vertices when loaded. */
+        int nTriangles; /**< Number of triangles when loaded. */
+        char* MOPY; /**< MOPY data. */
+        uint16* MOVI; /**< MOVI data. */
+        uint16* MoviEx; /**< MoviEx data. */
+        float* MOVT; /**< MOVT data. */
+        uint16* MOBA; /**< MOBA data. */
+        int* MobaEx; /**< MobaEx data. */
+        WMOLiquidHeader* hlq; /**< WMO liquid header. */
+        WMOLiquidVert* LiquEx; /**< WMO liquid vertices. */
+        char* LiquBytes; /**< Liquid bytes. */
+        uint32 liquflags; /**< Liquid flags. */
 
         /**
-         * @brief
+         * @brief Constructs a WMOGroup object.
          *
-         * @param filename
+         * @param filename The name of the WMO group file.
          */
         WMOGroup(std::string& filename);
         /**
-         * @brief
-         *
+         * @brief Destroys the WMOGroup object.
          */
         ~WMOGroup();
 
         /**
-         * @brief
+         * @brief Opens the WMO group file.
          *
-         * @return bool
+         * @return True if the file was successfully opened, false otherwise.
          */
         bool open();
         /**
-         * @brief
+         * @brief Converts the WMO group to VMAP format.
          *
-         * @param output
-         * @param rootWMO
-         * @param pPreciseVectorData
-         * @return int
+         * @param output The output file.
+         * @param rootWMO The root WMO object.
+         * @param pPreciseVectorData Whether to use precise vector data.
+         * @param iCoreNumber The core number.
+         * @return The result of the conversion.
          */
         int ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPreciseVectorData, int iCoreNumber);
 
     private:
-        std::string filename; /**< TODO */
+        std::string filename; /**< The name of the WMO group file. */
 };
 
 /**
- * @brief
- *
+ * @brief Represents an instance of a WMO.
  */
 class WMOInstance
 {
-        static std::set<int> ids; /**< TODO */
+        static std::set<int> ids; /**< Set of IDs. */
     public:
-        std::string MapName; /**< TODO */
-        int currx; /**< TODO */
-        int curry; /**< TODO */
-        WMOGroup* wmo; /**< TODO */
-        Vec3D pos; /**< TODO */
-        Vec3D pos2, pos3, rot; /**< TODO */
-        uint32 indx, id, d2, d3; /**< TODO */
-        int doodadset; /**< TODO */
-        std::string szWorkDirWmo;
+        std::string MapName; /**< Name of the map. */
+        int currx; /**< Current x coordinate. */
+        int curry; /**< Current y coordinate. */
+        WMOGroup* wmo; /**< Pointer to the WMO group. */
+        Vec3D pos; /**< Position vector. */
+        Vec3D pos2, pos3, rot; /**< Additional position and rotation vectors. */
+        uint32 indx, id, d2, d3; /**< Index, ID, and additional data. */
+        int doodadset; /**< Doodad set. */
+        std::string szWorkDirWmo; /**< Working directory for WMO. */
 
         /**
-         * @brief
+         * @brief Constructs a WMOInstance object.
          *
-         * @param f
-         * @param WmoInstName
-         * @param mapID
-         * @param tileX
-         * @param tileY
-         * @param pDirfile
+         * @param f The MPQ file.
+         * @param WmoInstName The name of the WMO instance.
+         * @param mapID The map ID.
+         * @param tileX The x coordinate of the tile.
+         * @param tileY The y coordinate of the tile.
+         * @param pDirfile The directory file.
+         * @param szWorkDirWmo The working directory for WMO.
          */
         WMOInstance(MPQFile& f, std::string& WmoInstName, uint32 mapID, uint32 tileX, uint32 tileY, FILE* pDirfile, std::string szWorkDirWmo);
 
         /**
-         * @brief
-         *
+         * @brief Resets the WMO instance.
          */
         static void reset();
 };
 
 /**
- * @brief
+ * @brief Extracts a single WMO file.
  *
- * @param fname
- * @return bool
+ * @param fname The name of the WMO file.
+ * @param iCoreNumber The core number.
+ * @param szRawVMAPMagic The VMAP magic string.
+ * @param preciseVectorData Whether to use precise vector data.
+ * @param szWorkDirWmo The working directory for WMO.
+ * @return True if the extraction was successful, false otherwise.
  */
 bool ExtractSingleWmo(std::string& fname, int iCoreNumber, std::string szRawVMAPMagic, bool preciseVectorData, std::string szWorkDirWmo);
 
 /**
- * @brief
+ * @brief Extracts all WMO files.
  *
- * @param
- * @return bool
+ * @param iCoreNumber The core number.
+ * @param szRawVMAPMagic The VMAP magic string.
+ * @param preciseVectorData Whether to use precise vector data.
+ * @param szWorkDirWmo The working directory for WMO.
+ * @return True if the extraction was successful, false otherwise.
  */
 bool ExtractWmo(int iCoreNumber, std::string szRawVMAPMagic, bool preciseVectorData, std::string szWorkDirWmo);
 
-#endif
+#endif // WMO_H
