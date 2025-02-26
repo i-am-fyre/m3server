@@ -60,6 +60,10 @@
 #include <sys/stat.h>
 #endif
 
+#include <iostream>
+#include <limits>
+
+
 extern ArchiveSet gOpenArchives;    /**< TODO */
 
 /**
@@ -159,6 +163,11 @@ int ExtractWDTFilefromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath, 
  * @return int Number of files extracted.
  */
 int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath, string localPath, std::vector<dataFile> mpqfiles);
+
+int ReturnAreaListId(int lookupId);
+
+
+
 
 // VMAP Additions
 std::string outDir = std::string(output_path) + "/vmaps";
@@ -372,6 +381,22 @@ uint8 liquid_flags[ADT_CELLS_PER_GRID][ADT_CELLS_PER_GRID];     /**< TODO */
 bool  liquid_show[ADT_GRID_SIZE][ADT_GRID_SIZE];                /**< TODO */
 float liquid_height[ADT_GRID_SIZE + 1][ADT_GRID_SIZE + 1];      /**< TODO */
 
+int ReturnAreaListId(int lookupId)
+{
+    if (lookupId <= AreaList.size())
+    {
+        for (int i = 0; i < AreaList.size(); ++i)
+        {
+            if (AreaList[i].lookupId == lookupId)
+            {
+                return i;
+            }
+        }
+    }
+    return 0;
+}
+
+
 /**
  * @brief Converts an ADT file to a map file.
  *
@@ -420,9 +445,12 @@ bool ConvertADT(char* adt_filename, char* output_filename)
             uint32 areaid = cell->areaid;
             if (areaid && areaid <= maxAreaId)
             {
-                if (AreaList[areaid].uint16Value != 0xffff)
+
+
+
+                if (AreaList[ReturnAreaListId(areaid)].uint16Value != 0xffff)
                 {
-                    area_flags[i][j] = AreaList[areaid].uint16Value;
+                    area_flags[i][j] = AreaList[ReturnAreaListId(areaid)].uint16Value;
                     continue;
                 }
                 if (debugLog)
@@ -650,29 +678,37 @@ bool ConvertADT(char* adt_filename, char* output_filename)
         if (heightHeader.flags & MAP_HEIGHT_AS_INT8)
         {
             for (int y = 0; y < ADT_GRID_SIZE; y++)
+            {
                 for (int x = 0; x < ADT_GRID_SIZE; x++)
                 {
                     uint8_V8[y][x] = uint8((V8[y][x] - minHeight) * step + 0.5f);
                 }
+            }
             for (int y = 0; y <= ADT_GRID_SIZE; y++)
+            {
                 for (int x = 0; x <= ADT_GRID_SIZE; x++)
                 {
                     uint8_V9[y][x] = uint8((V9[y][x] - minHeight) * step + 0.5f);
                 }
+            }
             map.heightMapSize += sizeof(uint8_V9) + sizeof(uint8_V8);
         }
         else if (heightHeader.flags & MAP_HEIGHT_AS_INT16)
         {
             for (int y = 0; y < ADT_GRID_SIZE; y++)
+            {
                 for (int x = 0; x < ADT_GRID_SIZE; x++)
                 {
                     uint16_V8[y][x] = uint16((V8[y][x] - minHeight) * step + 0.5f);
                 }
+            }
             for (int y = 0; y <= ADT_GRID_SIZE; y++)
+            {
                 for (int x = 0; x <= ADT_GRID_SIZE; x++)
                 {
                     uint16_V9[y][x] = uint16((V9[y][x] - minHeight) * step + 0.5f);
                 }
+            }
             map.heightMapSize += sizeof(uint16_V9) + sizeof(uint16_V8);
         }
         else
@@ -1358,6 +1394,11 @@ int main(int argc, char** argv)
     printf("  Core Number: %d\n", iCoreNumber);       // iCoreNumber contains the core number of the client
 
     setMapMagicVersion(iCoreNumber, MAP_VERSION_MAGIC);
+
+
+  std::cout << "Press ENTER to continue...";
+  std::cin.ignore( std::numeric_limits <std::streamsize> ::max(), '\n' );
+
 
     if (iCoreNumber == CLIENT_CLASSIC || iCoreNumber == CLIENT_TBC)
     {
