@@ -28,7 +28,7 @@
 #include "adtfile.h"
 #include <ExtractorCommon.h>
 
-ADTFile::ADTFile(char* filename): AdtFilename(filename)
+ADTFile::ADTFile(std::string filename): AdtFilename(filename)
 {
 }
 
@@ -41,7 +41,7 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failed
         printf("Error initializing ADT %s\n", AdtFilename.c_str());
     }
 
-    MPQFile ADT(adtHandle, AdtFilename.c_str());
+    MPQFile ADT(adtHandle, AdtFilename);
 
     if (ADT.isEof())
     {

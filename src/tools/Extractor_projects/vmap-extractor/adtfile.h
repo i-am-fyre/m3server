@@ -151,7 +151,7 @@ class ADTFile
          *
          * @param filename
          */
-        ADTFile(char* filename);
+        ADTFile(std::string filename);
         /**
          * @brief
          *
