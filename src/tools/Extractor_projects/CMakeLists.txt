@@ -95,7 +95,6 @@ add_executable(vmap-extractor
     vmap-extractor/modelheaders.h
     vmap-extractor/vec3d.h
     vmap-extractor/vmapexport.cpp
-    vmap-extractor/vmapexport.h
     vmap-extractor/wdtfile.cpp
     vmap-extractor/wdtfile.h
     vmap-extractor/wmo.cpp
