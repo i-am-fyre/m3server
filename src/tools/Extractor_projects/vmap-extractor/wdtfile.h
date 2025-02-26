@@ -30,63 +30,76 @@
 #include "wmo.h"
 #include "adtfile.h"
 
+/**
+ * @brief Enum representing terrain flags.
+ */
 enum TerrainFlags {
-    TERRAIN_HAS_ADT = 0x01
-};
-
-struct SMAreaInfo     // -> CMapAreaTableEntry
-{
-    uint32_t flags;
-    uint32_t asyncId;    // only set during runtime.
+    TERRAIN_HAS_ADT = 0x01 /**< Indicates that the terrain has an ADT file. */
 };
 
 /**
- * @brief
- *
+ * @brief Struct representing area information.
+ */
+struct SMAreaInfo     // -> CMapAreaTableEntry
+{
+    uint32_t flags; /**< Flags for the area. */
+    uint32_t asyncId; /**< Asynchronous ID, only set during runtime. */
+};
+
+/**
+ * @brief Class representing a WDT (World Map Definition) file.
  */
 class WDTFile
 {
     public:
         /**
-         * @brief
+         * @brief Constructs a WDTFile object.
          *
-         * @param file_name
-         * @param file_name1
+         * @param handle The handle to the MPQ file.
+         * @param file_name The name of the WDT file.
+         * @param file_name1 An additional file name.
          */
         WDTFile(HANDLE handle, char* file_name, char* file_name1);
         /**
-         * @brief
-         *
+         * @brief Destroys the WDTFile object.
          */
         ~WDTFile(void);
         /**
-         * @brief
+         * @brief Initializes the WDT file.
          *
-         * @param map_id
-         * @param mapID
-         * @return bool
+         * @param map_id The ID of the map.
+         * @param mapID The map ID.
+         * @param szWorkDirWmo The working directory for WMO files.
+         * @return True if the initialization was successful, false otherwise.
          */
         bool init(char* map_id, unsigned int mapID, std::string szWorkDirWmo);
 
+        /**
+         * @brief Checks if the terrain has an ADT file.
+         *
+         * @param x The x coordinate.
+         * @param y The y coordinate.
+         * @return True if the terrain has an ADT file, false otherwise.
+         */
         bool hasTerrain(int x, int y);
 
-        std::string* gWmoInstansName; /**< TODO */
-        int gnWMO, nMaps; /**< TODO */
+        std::string* gWmoInstansName; /**< Name of the WMO instance. */
+        int gnWMO, nMaps; /**< Number of WMOs and maps. */
 
         /**
-         * @brief
+         * @brief Gets the ADT file for the specified coordinates.
          *
-         * @param x
-         * @param z
-         * @return ADTFile
+         * @param x The x coordinate.
+         * @param y The y coordinate.
+         * @return A pointer to the ADTFile object.
          */
         ADTFile* GetMap(int x, int y);
 
     private:
-        MPQFile WDT; /**< TODO */
-        static const int MAP_TILE_SIZE = 64;
-        SMAreaInfo* mapAreaInfo[MAP_TILE_SIZE * MAP_TILE_SIZE];
-        std::string filename; /**< TODO */
+        MPQFile WDT; /**< The MPQ file for the WDT. */
+        static const int MAP_TILE_SIZE = 64; /**< The size of the map tile. */
+        SMAreaInfo* mapAreaInfo[MAP_TILE_SIZE * MAP_TILE_SIZE]; /**< Array of area information for the map tiles. */
+        std::string filename; /**< The name of the WDT file. */
 };
 
-#endif
+#endif // VMAP_WDTFILE_H

@@ -58,7 +58,6 @@
 #include "dbcfile.h"
 #include "wmo.h"
 #include <mpq.h>
-#include "vmapexport.h"
 #include "Auth/md5.h"
 
 #include "ExtractorCommon.h"
@@ -91,64 +90,8 @@ int iCoreNumber;
 typedef std::pair < std::string /*full_filename*/, char const* /*locale_prefix*/ > UpdatesPair;
 typedef std::map < int /*build*/, UpdatesPair > Updates;
 
-//// Constants
-//static const int LANG_COUNT = 12;
-//
-//static const std::string kClassicMPQList[] =
-//{
-//    "patch-2.MPQ",
-//    "patch.MPQ",
-//    "wmo.MPQ",
-//    "texture.MPQ",
-//    "terrain.MPQ",
-//    "speech.MPQ",
-//    "sound.MPQ",
-//    "model.MPQ",
-//    "misc.MPQ",
-//    "dbc.MPQ",
-//    "base.MPQ"
-//};
-//
-//static const std::string kTBCMPQList[] =
-//{
-//    "patch-2.MPQ",
-//    "patch.MPQ",
-//    "%s/patch-%s-2.MPQ",
-//    "%s/patch-%s.MPQ",
-//    "expansion.MPQ",
-//    "common.MPQ",
-//    "%s/locale-%s.MPQ",
-//    "%s/speech-%s.MPQ",
-//    "%s/expansion-locale-%s.MPQ",
-//    "%s/expansion-speech-%s.MPQ"
-//};
-//
-//static const std::string kWOTLKMPQList[] =
-//{
-//    "%s/patch-%s.MPQ",
-//    "patch.MPQ",
-//    "%s/patch-%s-2.MPQ",
-//    "%s/patch-%s-3.MPQ",
-//    "patch-2.MPQ",
-//    "patch-3.MPQ",
-//    "expansion.MPQ",
-//    "lichking.MPQ",
-//    "common.MPQ",
-//    "common-2.MPQ",
-//    "%s/locale-%s.MPQ",
-//    "%s/speech-%s.MPQ",
-//    "%s/expansion-locale-%s.MPQ",
-//    "%s/lichking-locale-%s.MPQ",
-//    "%s/expansion-speech-%s.MPQ",
-//    "%s/lichking-speech-%s.MPQ"
-//};
-
-//static const char * szWorkDirMaps = ".\\Maps";
-
-// Local testing functions
-
 /**
- * @brief
+ * @brief Reads the LiquidType.dbc file and loads the liquid types into memory.
  *
  */
 void ReadLiquidTypeTableDBC()
@@ -182,11 +125,15 @@ void ReadLiquidTypeTableDBC()
     printf(" Success! %zu liquid types loaded.\n", LiqType_count);
 }
 
-static void ParseMapFiles(std::string szRawVMAPMagic)
+/**
+ * @brief Parses the map files and processes each map.
+ *
+ * @param localSzRawVMAPMagic The magic string for raw VMAP files.
+ */
+static void ParseMapFiles(std::string localSzRawVMAPMagic)
 {
-    char fn[512];
-    //char id_filename[64];
-    char id[10];
+    char* fn = new char[512];
+    char* id = new char[10];
     StringSet failedPaths;
     printf("\n");
     for (unsigned int i = 0; i < map_count; ++i)
@@ -211,8 +158,7 @@ static void ParseMapFiles(std::string szRawVMAPMagic)
                 {
                     if (ADTFile* ADT = WDT.GetMap(x, y))
                     {
-                        //sprintf(id_filename,"%02u %02u %03u",x,y,map_ids[i].id);//!!!!!!!!!
-                        ADT->init(map_ids[i].id, x, y, failedPaths, iCoreNumber, szRawVMAPMagic, preciseVectorData, szWorkDirWmo);
+                        ADT->init(map_ids[i].id, x, y, failedPaths, iCoreNumber, localSzRawVMAPMagic, preciseVectorData, szWorkDirWmo);
                         delete ADT;
                     }
                 }
@@ -232,8 +178,19 @@ static void ParseMapFiles(std::string szRawVMAPMagic)
         }
         printf(" A few not found models can be expected and are not alarming.\n");
     }
+
+    delete[] fn;
+    delete[] id;
 }
 
+/**
+ * @brief Appends patch MPQ files to the list of updates.
+ *
+ * @param subdir The subdirectory to search for patch files.
+ * @param suffix The suffix of the patch files.
+ * @param section The section of the patch files.
+ * @param updates The map of updates to append to.
+ */
 void AppendPatchMPQFilesToList(char const* subdir, char const* suffix, char const* section, Updates& updates)
 {
     char dirname[512];
@@ -308,6 +265,11 @@ void AppendPatchMPQFilesToList(char const* subdir, char const* suffix, char cons
 #endif
 }
 
+/**
+ * @brief Loads the locale-specific MPQ files.
+ *
+ * @param locale The locale to load the MPQ files for.
+ */
 void LoadLocaleMPQFiles(int const locale)
 {
     char filename[512];
@@ -415,8 +377,9 @@ void LoadLocaleMPQFiles(int const locale)
 }
 
 /**
- * @brief
+ * @brief Loads the common MPQ files for the specified client.
  *
+ * @param client The client to load the MPQ files for.
  */
 void LoadCommonMPQFiles(int client)
 {
@@ -473,6 +436,11 @@ void LoadCommonMPQFiles(int client)
     }
 }
 
+/**
+ * @brief Displays the usage information for the program.
+ *
+ * @param prg The program name.
+ */
 void Usage(char* prg)
 {
     printf(" Usage: %s [OPTION]\n\n", prg);
@@ -487,6 +455,13 @@ void Usage(char* prg)
     printf("   %s -l -i \"c:\\games\\world of warcraft\"\n", prg);
 }
 
+/**
+ * @brief Processes the command line arguments.
+ *
+ * @param argc The number of arguments.
+ * @param argv The array of arguments.
+ * @return true if the arguments were processed successfully, false otherwise.
+ */
 bool processArgv(int argc, char** argv)
 {
     bool result = true;
@@ -563,7 +538,7 @@ int main(int argc, char** argv)
 
     if (!stat(sdir.c_str(), &status) || !stat(sdir_bin.c_str(), &status))
     {
-        printf(" Your %s directory seems to exist, please delete it!\n", szWorkDirWmo);
+        printf(" Your %s directory seems to exist, please delete it!\n", szWorkDirWmo.c_str());
         dirty = true;
     }
 
@@ -647,7 +622,7 @@ int main(int argc, char** argv)
 
     if (!success)
     {
-        printf("ERROR: Extract for %s. Work NOT complete.\n   Precise vector data=%d.\nPress any key.\n", szRawVMAPMagic, preciseVectorData);
+        printf("ERROR: Extract for %s. Work NOT complete.\n   Precise vector data=%d.\nPress any key.\n", szRawVMAPMagic.c_str(), preciseVectorData);
         getchar();
         return 1;
     }
@@ -656,7 +631,7 @@ int main(int argc, char** argv)
 
     if (!success)
     {
-        printf("ERROR: VMAP building for %s NOT completed", szRawVMAPMagic);
+        printf("ERROR: VMAP building for %s NOT completed", szRawVMAPMagic.c_str());
         getchar();
         return 1;
     }

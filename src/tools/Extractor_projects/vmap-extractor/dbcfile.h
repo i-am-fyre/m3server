@@ -30,88 +30,86 @@
 #include "StormLib.h"
 
 /**
- * @brief
- *
+ * @brief Class representing a DBC (DataBase Client) file.
  */
 class DBCFile
 {
     public:
         /**
-         * @brief
+         * @brief Constructs a DBCFile object with the given filename.
          *
-         * @param filename
+         * @param filename The name of the DBC file.
          */
         DBCFile(const std::string& filename);
+        /**
+         * @brief Constructs a DBCFile object with the given file handle.
+         *
+         * @param file The handle to the DBC file.
+         */
         DBCFile(HANDLE file);
         /**
-         * @brief
-         *
+         * @brief Destroys the DBCFile object.
          */
         ~DBCFile();
 
         /**
-         * @brief Open database. It must be openened before it can be used.
+         * @brief Opens the DBC file. It must be opened before it can be used.
          *
-         * @return bool
+         * @return True if the file was successfully opened, false otherwise.
          */
         bool open();
 
         /**
-         * @brief Database exceptions
-         *
+         * @brief Class representing exceptions related to DBC files.
          */
         class Exception
         {
             public:
                 /**
-                 * @brief
+                 * @brief Constructs an Exception object with the given message.
                  *
-                 * @param message
+                 * @param message The exception message.
                  */
-                Exception(const std::string& message): message(message)
-                { }
+                Exception(const std::string& message): message(message) { }
                 /**
-                 * @brief
-                 *
+                 * @brief Destroys the Exception object.
                  */
-                virtual ~Exception()
-                { }
+                virtual ~Exception() { }
                 /**
-                 * @brief
+                 * @brief Gets the exception message.
                  *
-                 * @return const std::string
+                 * @return The exception message.
                  */
-                const std::string& getMessage() {return message;}
+                const std::string& getMessage() { return message; }
             private:
-                std::string message; /**< TODO */
+                std::string message; /**< The exception message. */
         };
+
         /**
-         * @brief
-         *
+         * @brief Class representing a "not found" exception.
          */
         class NotFound: public Exception
         {
             public:
                 /**
-                 * @brief
-                 *
+                 * @brief Constructs a NotFound exception.
                  */
-                NotFound(): Exception("Key was not found")
-                { }
+                NotFound(): Exception("Key was not found") { }
         };
+
         class Iterator;
+
         /**
-         * @brief Iteration over database
-         *
+         * @brief Class representing a record in the DBC file.
          */
         class Record
         {
             public:
                 /**
-                 * @brief
+                 * @brief Assignment operator for Record.
                  *
-                 * @param r
-                 * @return Record &operator
+                 * @param r The record to assign.
+                 * @return Reference to the assigned record.
                  */
                 Record& operator= (const Record& r)
                 {
@@ -119,55 +117,60 @@ class DBCFile
                     offset = r.offset;
                     return *this;
                 }
+
                 /**
-                 * @brief
+                 * @brief Gets a float value from the specified field.
                  *
-                 * @param field
-                 * @return float
+                 * @param field The field index.
+                 * @return The float value.
                  */
                 float getFloat(size_t field) const
                 {
                     assert(field < file.fieldCount);
                     return *reinterpret_cast<float*>(offset + (field * 4));
                 }
+
                 /**
-                 * @brief
+                 * @brief Gets an unsigned int value from the specified field.
                  *
-                 * @param field
-                 * @return unsigned int
+                 * @param field The field index.
+                 * @return The unsigned int value.
                  */
                 unsigned int getUInt(size_t field) const
                 {
                     assert(field < file.fieldCount);
                     return *reinterpret_cast<unsigned int*>(offset + (field * 4));
                 }
+
                 /**
-                 * @brief
+                 * @brief Gets an int value from the specified field.
                  *
-                 * @param field
-                 * @return int
+                 * @param field The field index.
+                 * @return The int value.
                  */
                 int getInt(size_t field) const
                 {
                     assert(field < file.fieldCount);
                     return *reinterpret_cast<int*>(offset + (field * 4));
                 }
+
                 /**
-                 * @brief
+                 * @brief Gets a byte value from the specified offset.
                  *
-                 * @param ofs
-                 * @return unsigned char
+                 * @param ofs The offset.
+                 * @return The byte value.
                  */
                 unsigned char getByte(size_t ofs) const
                 {
                     assert(ofs < file.recordSize);
                     return *reinterpret_cast<unsigned char*>(offset + ofs);
                 }
+
                 /**
-                 * @brief
+                 * @brief Gets a string value from the specified field.
                  *
-                 * @param field
-                 * @return const char
+                 * @param field The field index.
+                 * @return The string value.
                  */
                 const char* getString(size_t field) const
                 {
@@ -178,129 +181,135 @@ class DBCFile
                 }
             private:
                 /**
-                 * @brief
+                 * @brief Constructs a Record object.
                  *
-                 * @param file
-                 * @param offset
+                 * @param file The DBC file.
+                 * @param offset The offset to the record.
                  */
                 Record(DBCFile& file, unsigned char* offset): file(file), offset(offset) {}
-                DBCFile& file; /**< TODO */
-                unsigned char* offset; /**< TODO */
+                DBCFile& file; /**< Reference to the DBC file. */
+                unsigned char* offset; /**< Offset to the record. */
 
                 friend class DBCFile;
                 friend class DBCFile::Iterator;
         };
 
         /**
-         * @brief Iterator that iterates over records
-         *
+         * @brief Class representing an iterator that iterates over records in the DBC file.
          */
         class Iterator
         {
             public:
                 /**
-                 * @brief
+                 * @brief Constructs an Iterator object.
                  *
-                 * @param file
-                 * @param offset
+                 * @param file The DBC file.
+                 * @param offset The offset to the record.
                  */
-                Iterator(DBCFile& file, unsigned char* offset):
-                    record(file, offset) {}
+                Iterator(DBCFile& file, unsigned char* offset): record(file, offset) {}
+
                 /**
-                 * @brief Advance (prefix only)
+                 * @brief Advances the iterator (prefix only).
                  *
-                 * @return Iterator &operator
+                 * @return Reference to the advanced iterator.
                  */
                 Iterator& operator++()
                 {
                     record.offset += record.file.recordSize;
                     return *this;
                 }
+
                 /**
-                 * @brief Return address of current instance
+                 * @brief Dereferences the iterator to get the current record.
                  *
-                 * @return const Record &operator
+                 * @return Reference to the current record.
                  */
                 Record const& operator*() const { return record; }
+
                 /**
-                 * @brief
+                 * @brief Dereferences the iterator to get the current record.
                  *
-                 * @return const Record *operator ->
+                 * @return Pointer to the current record.
                  */
                 const Record* operator->() const
                 {
                     return &record;
                 }
                 /**
-                 * @brief Comparison
+                 * @brief Compares two iterators for equality.
                  *
-                 * @param b
-                 * @return bool operator
+                 * @param b The iterator to compare with.
+                 * @return True if the iterators are equal, false otherwise.
                  */
                 bool operator==(const Iterator& b) const
                 {
                     return record.offset == b.record.offset;
                 }
                 /**
-                 * @brief
+                 * @brief Compares two iterators for inequality.
                  *
-                 * @param b
-                 * @return bool operator
+                 * @param b The iterator to compare with.
+                 * @return True if the iterators are not equal, false otherwise.
                  */
                 bool operator!=(const Iterator& b) const
                 {
                     return record.offset != b.record.offset;
                 }
             private:
-                Record record; /**< TODO */
+                Record record; /**< The current record. */
         };
 
         /**
-         * @brief Get record by id
+         * @brief Gets a record by its ID.
          *
-         * @param id
-         * @return Record
+         * @param id The record ID.
+         * @return The record.
          */
         Record getRecord(size_t id);
+
         /**
-         * @brief Get begin iterator over records
+         * @brief Gets an iterator to the beginning of the records.
          *
-         * @return Iterator
+         * @return The iterator.
          */
         Iterator begin();
+
         /**
-         * @brief Get begin iterator over records
+         * @brief Gets an iterator to the end of the records.
          *
-         * @return Iterator
+         * @return The iterator.
          */
         Iterator end();
+
         /**
-         * @brief Trivial
+         * @brief Gets the number of records in the DBC file.
          *
-         * @return size_t
+         * @return The number of records.
          */
-        size_t getRecordCount() const { return recordCount;}
+        size_t getRecordCount() const { return recordCount; }
+
         /**
-         * @brief
+         * @brief Gets the number of fields in each record.
          *
-         * @return size_t
+         * @return The number of fields.
          */
         size_t getFieldCount() const { return fieldCount; }
+
         /**
-         * @brief
+         * @brief Gets the maximum ID of the records.
          *
-         * @return size_t
+         * @return The maximum ID.
          */
         size_t getMaxId();
     private:
-        std::string filename; /**< TODO */
-        HANDLE fileHandle; /**< TODO */
-        size_t recordSize; /**< TODO */
-        size_t recordCount; /**< TODO */
-        size_t fieldCount; /**< TODO */
-        size_t stringSize; /**< TODO */
-        unsigned char* data; /**< TODO */
-        unsigned char* stringTable; /**< TODO */
+        std::string filename; /**< The name of the DBC file. */
+        HANDLE fileHandle; /**< The handle to the DBC file. */
+        size_t recordSize; /**< The size of each record. */
+        size_t recordCount; /**< The number of records. */
+        size_t fieldCount; /**< The number of fields in each record. */
+        size_t stringSize; /**< The size of the string table. */
+        unsigned char* data; /**< Pointer to the data. */
+        unsigned char* stringTable; /**< Pointer to the string table. */
 };
 
-#endif
+#endif // DBCFILE_H

@@ -32,10 +32,25 @@
 #include "dbcfile.h"
 #include <ExtractorCommon.h>
 
-Model::Model(std::string& filename) : filename(filename), vertices(0), indices(0)
+/**
+ * @brief Constructor for the Model class.
+ *
+ * @param filename The name of the model file.
+ */
+Model::Model(std::string& filename)
+    : filename(filename), vertices(0), indices(0), boundingVertices(nullptr), nIndices(0), ok(false)
 {
+    memset(&headerClassicTBC, 0, sizeof(headerClassicTBC));
+    memset(&headerOthers, 0, sizeof(headerOthers));
 }
 
+/**
+ * @brief Opens the model file and reads its data.
+ *
+ * @param failedPaths Set of failed paths.
+ * @param iCoreNumber Core number.
+ * @return true if the model file is successfully opened, false otherwise.
+ */
 bool Model::open(StringSet& failedPaths, int iCoreNumber)
 {
     HANDLE mpqHandle;
@@ -63,7 +78,7 @@ bool Model::open(StringSet& failedPaths, int iCoreNumber)
     uint32 unBoundingVertices = 0;
     uint32 unBoundingTriangles = 0;
 
-
+    // Read headers based on the core number
     if (iCoreNumber == CLIENT_CLASSIC || iCoreNumber == CLIENT_TBC)
     {
         memcpy(&headerClassicTBC, f.getBuffer(), sizeof(ModelHeaderClassicTBC));
@@ -115,7 +130,17 @@ bool Model::open(StringSet& failedPaths, int iCoreNumber)
     return true;
 }
 
-bool Model::ConvertToVMAPModel(std::string& outfilename,int iCoreNumber, std::string szRawVMAPMagic, bool preciseVectorData, std::string szWorkDirWmo)
+/**
+ * @brief Converts the model to a VMAP model.
+ *
+ * @param outfilename Output filename.
+ * @param iCoreNumber Core number.
+ * @param szRawVMAPMagic VMAP magic string.
+ * @param preciseVectorData Whether to use precise vector data.
+ * @param szWorkDirWmo Working directory for WMO files.
+ * @return true if the conversion is successful, false otherwise.
+ */
+bool Model::ConvertToVMAPModel(std::string& outfilename, int iCoreNumber, std::string szRawVMAPMagic, bool preciseVectorData, std::string szWorkDirWmo)
 {
     int N[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     FILE* output = fopen(outfilename.c_str(), "wb");
@@ -182,9 +207,20 @@ bool Model::ConvertToVMAPModel(std::string& outfilename,int iCoreNumber, std::st
     return true;
 }
 
-
-
-ModelInstance::ModelInstance(MPQFile& f, string& ModelInstName, uint32 mapID, uint32 tileX, uint32 tileY, FILE* pDirfile, int coreNumber, std::string szWorkDirWmo)
+/**
+ * @brief Constructor for the ModelInstance class.
+ *
+ * @param f MPQ file.
+ * @param ModelInstName Name of the model instance.
+ * @param mapID Map ID.
+ * @param tileX X coordinate of the tile.
+ * @param tileY Y coordinate of the tile.
+ * @param pDirfile Directory file.
+ * @param coreNumber Core number.
+ * @param szWorkDirWmo Working directory for WMO files.
+ */
+ModelInstance::ModelInstance(MPQFile& f, std::string& ModelInstName, uint32 mapID, uint32 tileX, uint32 tileY, FILE* pDirfile, int coreNumber, std::string szWorkDirWmo)
+    : model(nullptr) // Initialize model to nullptr
 {
     float ff[3];
     f.read(&id, 4);
@@ -201,12 +237,12 @@ ModelInstance::ModelInstance(MPQFile& f, string& ModelInstName, uint32 mapID, ui
     }
     if (coreNumber == CLIENT_CLASSIC || coreNumber == CLIENT_CATA)
     {
-        f.read(&scaleZeroOnly,4);  // The above three lines introduced a regression bug in Mangos Zero, is Fine for other cores.
+        f.read(&scaleZeroOnly, 4);  // The above three lines introduced a regression bug in Mangos Zero, is Fine for other cores.
         sc = scaleZeroOnly / 1024.0f; // scale factor - divide by 1024. why not just use a float?
     }
 
     char tempname[512];
-    sprintf(tempname, "%s/%s", szWorkDirWmo, ModelInstName.c_str());
+    sprintf(tempname, "%s/%s", szWorkDirWmo.c_str(), ModelInstName.c_str());
     FILE* input;
     input = fopen(tempname, "r+b");
 
@@ -226,13 +262,13 @@ ModelInstance::ModelInstance(MPQFile& f, string& ModelInstName, uint32 mapID, ui
         return;
     }
 
-    uint16 adtId = 0;// not used for models
+    uint16 adtId = 0; // not used for models
     uint32 flags = MOD_M2;
     if (tileX == 65 && tileY == 65)
     {
         flags |= MOD_WORLDSPAWN;
     }
-    //write mapID, tileX, tileY, Flags, ID, Pos, Rot, Scale, name
+    // write mapID, tileX, tileY, Flags, ID, Pos, Rot, Scale, name
     fwrite(&mapID, sizeof(uint32), 1, pDirfile);
     fwrite(&tileX, sizeof(uint32), 1, pDirfile);
     fwrite(&tileY, sizeof(uint32), 1, pDirfile);
@@ -248,7 +284,19 @@ ModelInstance::ModelInstance(MPQFile& f, string& ModelInstName, uint32 mapID, ui
 
 }
 
-bool ExtractSingleModel(std::string& origPath, std::string& fixedName, StringSet& failedPaths, int iCoreNumber, std::string szRawVMAPMagic, bool preciseVectorData, std::string szWorkDirWmo)
+/**
+ * @brief Extracts a single model.
+ *
+ * @param origPath Original path of the model.
+ * @param fixedName Fixed name of the model.
+ * @param failedPaths Set of failed paths.
+ * @param iCoreNumber Core number.
+ * @param szRawVMAPMagic VMAP magic string.
+ * @param preciseVectorData Whether to use precise vector data.
+ * @param szWorkDirWmo Working directory for WMO files.
+ * @return true if the model is successfully extracted, false otherwise.
+ */
+bool ExtractSingleModel(std::string& origPath, std::string& fixedName, std::set<std::string>& failedPaths, int iCoreNumber, std::string szRawVMAPMagic, bool preciseVectorData, std::string szWorkDirWmo)
 {
     string ext = GetExtension(origPath);
 
@@ -281,6 +329,14 @@ bool ExtractSingleModel(std::string& origPath, std::string& fixedName, StringSet
     return mdl.ConvertToVMAPModel(output, iCoreNumber, szRawVMAPMagic, preciseVectorData, szWorkDirWmo);
 }
 
+/**
+ * @brief Extracts game object models.
+ *
+ * @param iCoreNumber Core number.
+ * @param szRawVMAPMagic VMAP magic string.
+ * @param preciseVectorData Whether to use precise vector data.
+ * @param szWorkDirWmo Working directory for WMO files.
+ */
 void ExtractGameobjectModels(int iCoreNumber, std::string szRawVMAPMagic, bool preciseVectorData, std::string szWorkDirWmo)
 {
     printf("\n");
@@ -357,3 +413,4 @@ void ExtractGameobjectModels(int iCoreNumber, std::string szRawVMAPMagic, bool p
 
     printf("\n Asset Extraction Complete !\n");
 }
+

@@ -25,157 +25,160 @@
 #ifndef MODELHEADERS_H
 #define MODELHEADERS_H
 
-
 #pragma pack(push,1)
 
 /**
- * @brief
- *
+ * @brief Struct representing the header of a model for Classic and TBC versions.
  */
 struct ModelHeaderClassicTBC
 {
-    char id[4]; /**< TODO */
-    uint8 version[4]; /**< TODO */
-    uint32 nameLength; /**< TODO */
-    uint32 nameOfs; /**< TODO */
-    uint32 type; /**< TODO */
-    uint32 nGlobalSequences; /**< TODO */
-    uint32 ofsGlobalSequences; /**< TODO */
-    uint32 nAnimations; /**< TODO */
-    uint32 ofsAnimations; /**< TODO */
-    uint32 nAnimationLookup; /**< TODO */
-    uint32 ofsAnimationLookup; /**< TODO */
-    uint32 nD; /**< TODO */
-    uint32 ofsD; /**< TODO */
-    uint32 nBones; /**< TODO */
-    uint32 ofsBones; /**< TODO */
-    uint32 nKeyBoneLookup; /**< TODO */
-    uint32 ofsKeyBoneLookup; /**< TODO */
-    uint32 nVertices; /**< TODO */
-    uint32 ofsVertices; /**< TODO */
-    uint32 nViews; /**< TODO */
-    uint32 ofsViews; /**< TODO */
-    uint32 nColors; /**< TODO */
-    uint32 ofsColors; /**< TODO */
-    uint32 nTextures; /**< TODO */
-    uint32 ofsTextures; /**< TODO */
-    uint32 nTransparency; /**< TODO */
-    uint32 ofsTransparency; /**< TODO */
-    uint32 nI; /**< TODO */
-    uint32 ofsI; /**< TODO */
-    uint32 nTextureanimations; /**< TODO */
-    uint32 ofsTextureanimations; /**< TODO */
-    uint32 nTexReplace; /**< TODO */
-    uint32 ofsTexReplace; /**< TODO */
-    uint32 nRenderFlags; /**< TODO */
-    uint32 ofsRenderFlags; /**< TODO */
-    uint32 nBoneLookupTable; /**< TODO */
-    uint32 ofsBoneLookupTable; /**< TODO */
-    uint32 nTexLookup; /**< TODO */
-    uint32 ofsTexLookup; /**< TODO */
-    uint32 nTexUnits; /**< TODO */
-    uint32 ofsTexUnits; /**< TODO */
-    uint32 nTransLookup; /**< TODO */
-    uint32 ofsTransLookup; /**< TODO */
-    uint32 nTexAnimLookup; /**< TODO */
-    uint32 ofsTexAnimLookup; /**< TODO */
-    float floats[14]; /**< TODO */
-    uint32 nBoundingTriangles; /**< TODO */
-    uint32 ofsBoundingTriangles; /**< TODO */
-    uint32 nBoundingVertices; /**< TODO */
-    uint32 ofsBoundingVertices; /**< TODO */
-    uint32 nBoundingNormals; /**< TODO */
-    uint32 ofsBoundingNormals; /**< TODO */
-    uint32 nAttachments; /**< TODO */
-    uint32 ofsAttachments; /**< TODO */
-    uint32 nAttachLookup; /**< TODO */
-    uint32 ofsAttachLookup; /**< TODO */
-    uint32 nAttachments_2; /**< TODO */
-    uint32 ofsAttachments_2; /**< TODO */
-    uint32 nLights; /**< TODO */
-    uint32 ofsLights; /**< TODO */
-    uint32 nCameras; /**< TODO */
-    uint32 ofsCameras; /**< TODO */
-    uint32 nCameraLookup; /**< TODO */
-    uint32 ofsCameraLookup; /**< TODO */
-    uint32 nRibbonEmitters; /**< TODO */
-    uint32 ofsRibbonEmitters; /**< TODO */
-    uint32 nParticleEmitters; /**< TODO */
-    uint32 ofsParticleEmitters; /**< TODO */
-
+    char id[4]; /**< Model ID. */
+    uint8 version[4]; /**< Model version. */
+    uint32 nameLength; /**< Length of the model name. */
+    uint32 nameOfs; /**< Offset to the model name. */
+    uint32 type; /**< Model type. */
+    uint32 nGlobalSequences; /**< Number of global sequences. */
+    uint32 ofsGlobalSequences; /**< Offset to global sequences. */
+    uint32 nAnimations; /**< Number of animations. */
+    uint32 ofsAnimations; /**< Offset to animations. */
+    uint32 nAnimationLookup; /**< Number of animation lookups. */
+    uint32 ofsAnimationLookup; /**< Offset to animation lookups. */
+    uint32 nD; /**< Number of D (unknown). */
+    uint32 ofsD; /**< Offset to D (unknown). */
+    uint32 nBones; /**< Number of bones. */
+    uint32 ofsBones; /**< Offset to bones. */
+    uint32 nKeyBoneLookup; /**< Number of key bone lookups. */
+    uint32 ofsKeyBoneLookup; /**< Offset to key bone lookups. */
+    uint32 nVertices; /**< Number of vertices. */
+    uint32 ofsVertices; /**< Offset to vertices. */
+    uint32 nViews; /**< Number of views. */
+    uint32 ofsViews; /**< Offset to views. */
+    uint32 nColors; /**< Number of colors. */
+    uint32 ofsColors; /**< Offset to colors. */
+    uint32 nTextures; /**< Number of textures. */
+    uint32 ofsTextures; /**< Offset to textures. */
+    uint32 nTransparency; /**< Number of transparency entries. */
+    uint32 ofsTransparency; /**< Offset to transparency entries. */
+    uint32 nI; /**< Number of I (unknown). */
+    uint32 ofsI; /**< Offset to I (unknown). */
+    uint32 nTextureanimations; /**< Number of texture animations. */
+    uint32 ofsTextureanimations; /**< Offset to texture animations. */
+    uint32 nTexReplace; /**< Number of texture replacements. */
+    uint32 ofsTexReplace; /**< Offset to texture replacements. */
+    uint32 nRenderFlags; /**< Number of render flags. */
+    uint32 ofsRenderFlags; /**< Offset to render flags. */
+    uint32 nBoneLookupTable; /**< Number of bone lookup table entries. */
+    uint32 ofsBoneLookupTable; /**< Offset to bone lookup table. */
+    uint32 nTexLookup; /**< Number of texture lookups. */
+    uint32 ofsTexLookup; /**< Offset to texture lookups. */
+    uint32 nTexUnits; /**< Number of texture units. */
+    uint32 ofsTexUnits; /**< Offset to texture units. */
+    uint32 nTransLookup; /**< Number of transparency lookups. */
+    uint32 ofsTransLookup; /**< Offset to transparency lookups. */
+    uint32 nTexAnimLookup; /**< Number of texture animation lookups. */
+    uint32 ofsTexAnimLookup; /**< Offset to texture animation lookups. */
+    float floats[14]; /**< Array of floats (unknown purpose). */
+    uint32 nBoundingTriangles; /**< Number of bounding triangles. */
+    uint32 ofsBoundingTriangles; /**< Offset to bounding triangles. */
+    uint32 nBoundingVertices; /**< Number of bounding vertices. */
+    uint32 ofsBoundingVertices; /**< Offset to bounding vertices. */
+    uint32 nBoundingNormals; /**< Number of bounding normals. */
+    uint32 ofsBoundingNormals; /**< Offset to bounding normals. */
+    uint32 nAttachments; /**< Number of attachments. */
+    uint32 ofsAttachments; /**< Offset to attachments. */
+    uint32 nAttachLookup; /**< Number of attachment lookups. */
+    uint32 ofsAttachLookup; /**< Offset to attachment lookups. */
+    uint32 nAttachments_2; /**< Number of secondary attachments. */
+    uint32 ofsAttachments_2; /**< Offset to secondary attachments. */
+    uint32 nLights; /**< Number of lights. */
+    uint32 ofsLights; /**< Offset to lights. */
+    uint32 nCameras; /**< Number of cameras. */
+    uint32 ofsCameras; /**< Offset to cameras. */
+    uint32 nCameraLookup; /**< Number of camera lookups. */
+    uint32 ofsCameraLookup; /**< Offset to camera lookups. */
+    uint32 nRibbonEmitters; /**< Number of ribbon emitters. */
+    uint32 ofsRibbonEmitters; /**< Offset to ribbon emitters. */
+    uint32 nParticleEmitters; /**< Number of particle emitters. */
+    uint32 ofsParticleEmitters; /**< Offset to particle emitters. */
 };
 
+/**
+ * @brief Struct representing the header of a model for other versions.
+ */
 struct ModelHeaderOthers
 {
-    char id[4]; /**< TODO */
-    uint8 version[4]; /**< TODO */
-    uint32 nameLength; /**< TODO */
-    uint32 nameOfs; /**< TODO */
-    uint32 type; /**< TODO */
-    uint32 nGlobalSequences; /**< TODO */
-    uint32 ofsGlobalSequences; /**< TODO */
-    uint32 nAnimations; /**< TODO */
-    uint32 ofsAnimations; /**< TODO */
-    uint32 nAnimationLookup; /**< TODO */
-    uint32 ofsAnimationLookup; /**< TODO */
-    uint32 nBones; /**< TODO */
-    uint32 ofsBones; /**< TODO */
-    uint32 nKeyBoneLookup; /**< TODO */
-    uint32 ofsKeyBoneLookup; /**< TODO */
-    uint32 nVertices; /**< TODO */
-    uint32 ofsVertices; /**< TODO */
-    uint32 nViews; /**< TODO */
-    uint32 nColors; /**< TODO */
-    uint32 ofsColors; /**< TODO */
-    uint32 nTextures; /**< TODO */
-    uint32 ofsTextures; /**< TODO */
-    uint32 nTransparency; /**< TODO */
-    uint32 ofsTransparency; /**< TODO */
-    uint32 nTextureanimations; /**< TODO */
-    uint32 ofsTextureanimations; /**< TODO */
-    uint32 nTexReplace; /**< TODO */
-    uint32 ofsTexReplace; /**< TODO */
-    uint32 nRenderFlags; /**< TODO */
-    uint32 ofsRenderFlags; /**< TODO */
-    uint32 nBoneLookupTable; /**< TODO */
-    uint32 ofsBoneLookupTable; /**< TODO */
-    uint32 nTexLookup; /**< TODO */
-    uint32 ofsTexLookup; /**< TODO */
-    uint32 nTexUnits; /**< TODO */
-    uint32 ofsTexUnits; /**< TODO */
-    uint32 nTransLookup; /**< TODO */
-    uint32 ofsTransLookup; /**< TODO */
-    uint32 nTexAnimLookup; /**< TODO */
-    uint32 ofsTexAnimLookup; /**< TODO */
-    float floats[14]; /**< TODO */
-    uint32 nBoundingTriangles; /**< TODO */
-    uint32 ofsBoundingTriangles; /**< TODO */
-    uint32 nBoundingVertices; /**< TODO */
-    uint32 ofsBoundingVertices; /**< TODO */
-    uint32 nBoundingNormals; /**< TODO */
-    uint32 ofsBoundingNormals; /**< TODO */
-    uint32 nAttachments; /**< TODO */
-    uint32 ofsAttachments; /**< TODO */
-    uint32 nAttachLookup; /**< TODO */
-    uint32 ofsAttachLookup; /**< TODO */
-    uint32 nAttachments_2; /**< TODO */
-    uint32 ofsAttachments_2; /**< TODO */
-    uint32 nLights; /**< TODO */
-    uint32 ofsLights; /**< TODO */
-    uint32 nCameras; /**< TODO */
-    uint32 ofsCameras; /**< TODO */
-    uint32 nCameraLookup; /**< TODO */
-    uint32 ofsCameraLookup; /**< TODO */
-    uint32 nRibbonEmitters; /**< TODO */
-    uint32 ofsRibbonEmitters; /**< TODO */
-    uint32 nParticleEmitters; /**< TODO */
-    uint32 ofsParticleEmitters; /**< TODO */
+    char id[4]; /**< Model ID. */
+    uint8 version[4]; /**< Model version. */
+    uint32 nameLength; /**< Length of the model name. */
+    uint32 nameOfs; /**< Offset to the model name. */
+    uint32 type; /**< Model type. */
+    uint32 nGlobalSequences; /**< Number of global sequences. */
+    uint32 ofsGlobalSequences; /**< Offset to global sequences. */
+    uint32 nAnimations; /**< Number of animations. */
+    uint32 ofsAnimations; /**< Offset to animations. */
+    uint32 nAnimationLookup; /**< Number of animation lookups. */
+    uint32 ofsAnimationLookup; /**< Offset to animation lookups. */
+    uint32 nBones; /**< Number of bones. */
+    uint32 ofsBones; /**< Offset to bones. */
+    uint32 nKeyBoneLookup; /**< Number of key bone lookups. */
+    uint32 ofsKeyBoneLookup; /**< Offset to key bone lookups. */
+    uint32 nVertices; /**< Number of vertices. */
+    uint32 ofsVertices; /**< Offset to vertices. */
+    uint32 nViews; /**< Number of views. */
+    uint32 nColors; /**< Number of colors. */
+    uint32 ofsColors; /**< Offset to colors. */
+    uint32 nTextures; /**< Number of textures. */
+    uint32 ofsTextures; /**< Offset to textures. */
+    uint32 nTransparency; /**< Number of transparency entries. */
+    uint32 ofsTransparency; /**< Offset to transparency entries. */
+    uint32 nTextureanimations; /**< Number of texture animations. */
+    uint32 ofsTextureanimations; /**< Offset to texture animations. */
+    uint32 nTexReplace; /**< Number of texture replacements. */
+    uint32 ofsTexReplace; /**< Offset to texture replacements. */
+    uint32 nRenderFlags; /**< Number of render flags. */
+    uint32 ofsRenderFlags; /**< Offset to render flags. */
+    uint32 nBoneLookupTable; /**< Number of bone lookup table entries. */
+    uint32 ofsBoneLookupTable; /**< Offset to bone lookup table. */
+    uint32 nTexLookup; /**< Number of texture lookups. */
+    uint32 ofsTexLookup; /**< Offset to texture lookups. */
+    uint32 nTexUnits; /**< Number of texture units. */
+    uint32 ofsTexUnits; /**< Offset to texture units. */
+    uint32 nTransLookup; /**< Number of transparency lookups. */
+    uint32 ofsTransLookup; /**< Offset to transparency lookups. */
+    uint32 nTexAnimLookup; /**< Number of texture animation lookups. */
+    uint32 ofsTexAnimLookup; /**< Offset to texture animation lookups. */
+    float floats[14]; /**< Array of floats (unknown purpose). */
+    uint32 nBoundingTriangles; /**< Number of bounding triangles. */
+    uint32 ofsBoundingTriangles; /**< Offset to bounding triangles. */
+    uint32 nBoundingVertices; /**< Number of bounding vertices. */
+    uint32 ofsBoundingVertices; /**< Offset to bounding vertices. */
+    uint32 nBoundingNormals; /**< Number of bounding normals. */
+    uint32 ofsBoundingNormals; /**< Offset to bounding normals. */
+    uint32 nAttachments; /**< Number of attachments. */
+    uint32 ofsAttachments; /**< Offset to attachments. */
+    uint32 nAttachLookup; /**< Number of attachment lookups. */
+    uint32 ofsAttachLookup; /**< Offset to attachment lookups. */
+    uint32 nAttachments_2; /**< Number of secondary attachments. */
+    uint32 ofsAttachments_2; /**< Offset to secondary attachments. */
+    uint32 nLights; /**< Number of lights. */
+    uint32 ofsLights; /**< Offset to lights. */
+    uint32 nCameras; /**< Number of cameras. */
+    uint32 ofsCameras; /**< Offset to cameras. */
+    uint32 nCameraLookup; /**< Number of camera lookups. */
+    uint32 ofsCameraLookup; /**< Offset to camera lookups. */
+    uint32 nRibbonEmitters; /**< Number of ribbon emitters. */
+    uint32 ofsRibbonEmitters; /**< Offset to ribbon emitters. */
+    uint32 nParticleEmitters; /**< Number of particle emitters. */
+    uint32 ofsParticleEmitters; /**< Offset to particle emitters. */
 };
 
+/**
+ * @brief Struct representing a bounding vertex in a model.
+ */
 struct ModelBoundingVertex
 {
-    Vec3D pos; /**< TODO */
+    Vec3D pos; /**< Position of the bounding vertex. */
 };
 
 #pragma pack(pop)
-#endif
+#endif // MODELHEADERS_H

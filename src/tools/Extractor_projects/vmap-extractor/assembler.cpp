@@ -25,17 +25,29 @@
 #include "TileAssembler.h"
 #include <string>
 
+/**
+ * AssembleVMAP - Assembles VMAP files from source to destination.
+ *
+ * @param src The source directory containing the VMAP files.
+ * @param dest The destination directory where the assembled VMAP files will be stored.
+ * @param szMagic A string representing the magic number for the VMAP files (currently unused).
+ * @return true if the assembly was successful, false otherwise.
+ */
 bool AssembleVMAP(std::string src, std::string dest, std::string szMagic)
 {
     bool success = true;
+
+    // Create a new TileAssembler object with the source and destination directories.
     VMAP::TileAssembler* ta = new VMAP::TileAssembler(src, dest);
 
-    //if (!ta->convertWorld2(szMagic))
+    // Convert the world data to VMAP format.
+    // The szMagic parameter is currently not used in the convertWorld2 function.
     if (!ta->convertWorld2())
     {
-        success = false;
+        success = false; // Set success to false if the conversion fails.
     }
 
+    // Clean up the TileAssembler object.
     delete ta;
-    return success;
+    return success; // Return the success status.
 }

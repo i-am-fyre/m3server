@@ -32,36 +32,42 @@
 #define UNITSIZE (CHUNKSIZE / 8.0f)
 typedef std::set<std::string> StringSet;
 
+/**
+ * @brief Class representing an ADT (Azeroth Data Terrain) file.
+ */
 class ADTFile
 {
     public:
         /**
-         * @brief
+         * @brief Constructs an ADTFile object with the given filename.
          *
-         * @param filename
+         * @param filename The name of the ADT file.
          */
         ADTFile(std::string filename);
         /**
-         * @brief
-         *
+         * @brief Destroys the ADTFile object.
          */
         ~ADTFile();
-        int nWMO; /**< TODO */
-        int nMDX; /**< TODO */
-        string* WmoInstansName; /**< TODO */
-        string* ModelInstansName; /**< TODO */
+        int nWMO = 0; /**< Number of WMOs (World Map Objects) in the ADT file. */
+        int nMDX = 0; /**< Number of MDXs (Model files) in the ADT file. */
+        std::string* WmoInstansName = nullptr; /**< Names of the WMO instances. */
+        std::string* ModelInstansName = nullptr; /**< Names of the model instances. */
         /**
-         * @brief
+         * @brief Initializes the ADT file.
          *
-         * @param map_num
-         * @param tileX
-         * @param tileY
-         * @param failedPaths
-         * @return bool
+         * @param map_num The map number.
+         * @param tileX The X coordinate of the tile.
+         * @param tileY The Y coordinate of the tile.
+         * @param failedPaths The set of failed paths.
+         * @param iCoreNumber The core number.
+         * @param szRawVMAPMagic The VMAP magic string.
+         * @param preciseVectorData Whether to use precise vector data.
+         * @param szWorkDirWmo The working directory for WMO files.
+         * @return True if the initialization was successful, false otherwise.
          */
-        bool init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failedPaths,int iCoreNumber, std::string szRawVMAPMagic, bool preciseVectorData, std::string szWorkDirWmo);
+        bool init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failedPaths, int iCoreNumber, std::string szRawVMAPMagic, bool preciseVectorData, std::string szWorkDirWmo);
     private:
-        std::string AdtFilename; /**< TODO */
+        std::string AdtFilename; /**< The name of the ADT file. */
 };
 
-#endif
+#endif // VMAP_ADTFILE_H
