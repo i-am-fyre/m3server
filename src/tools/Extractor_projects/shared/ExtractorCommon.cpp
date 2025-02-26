@@ -103,7 +103,7 @@ FILE* openWoWExe(char const* path)
 *  @PARAM sFilename is the filename of the WoW executable to be loaded
 *  @RETURN iBuild the build number of the WoW executable, or 0 if failed
 */
-int getBuildNumber(char const* path)
+int getBuildNumber(std::string path)
 {
     int iBuild = -1; ///< build version # of the WoW executable (returned value)
 
@@ -128,7 +128,7 @@ int getBuildNumber(char const* path)
     unsigned char mopBuild[4]      = { 0x38, 0x34, 0x31, 0x34 }; // (1)8414
 
     FILE *pFile;
-    if (!(pFile = openWoWExe(path)))
+    if (!(pFile = openWoWExe(path.c_str())))
     {
         printf("\nFatal Error: failed to locate the WoW executable!\n\n");
         printf("\nExiting program!!\n");

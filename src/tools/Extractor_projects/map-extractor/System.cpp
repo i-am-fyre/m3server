@@ -24,10 +24,8 @@
 
 #include <stdio.h>
 #include <set>
-
 #include "dbcfile.h"
 #include <mpq.h>
-
 #include <adt.h>
 #include <wdt.h>
 #include "ExtractorCommon.h"
@@ -37,6 +35,7 @@
 #include <list>
 #include <algorithm>
 #include <errno.h>
+#include <regex>
 
 //From Extractor
 #include "adtfile.h"
@@ -60,9 +59,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #endif
-#include <vector>
 
-#include <regex>
 extern ArchiveSet gOpenArchives;    /**< TODO */
 
 /**
@@ -86,8 +83,10 @@ typedef struct
 //map_id* map_ids;                    /**< TODO */
 //uint16* areas;                      /**< TODO */
 //uint16* LiqType;                    /**< TODO */
-char output_path[256] = ".";        /**< TODO */
-char input_path[256] = ".";         /**< TODO */
+//char output_path[256] = ".";        /**< TODO */
+//char input_path[256] = ".";         /**< TODO */
+std::string output_path = ".";        /**< TODO */
+std::string input_path = ".";         /**< TODO */
 uint32 maxAreaId = 0;               /**< TODO */
 int iCoreNumber = 0;
 int iBuildNumber = 0;
@@ -244,7 +243,7 @@ void HandleArgs(int argc, char* arg[])
             case 'i':
                 if (c + 1 < argc)                           // all ok
                 {
-                    strcpy(input_path, arg[(c++) + 1]);
+                    input_path = arg[(c++) + 1];
                 }
                 else
                 {
@@ -254,7 +253,7 @@ void HandleArgs(int argc, char* arg[])
             case 'o':
                 if (c + 1 < argc)                           // all ok
                 {
-                    strcpy(output_path, arg[(c++) + 1]);
+                    output_path = arg[(c++) + 1];
                 }
                 else
                 {
@@ -1337,7 +1336,7 @@ int main(int argc, char** argv)
     HandleArgs(argc, argv);
 
     // These need to be set before the banner is shown to reflect the correct information
-    iBuildNumber = getBuildNumber(input_path);                  // Get the build number of the client from wow.exe
+    iBuildNumber = getBuildNumber(input_path.c_str());                  // Get the build number of the client from wow.exe
     iCoreNumber = getCoreNumberFromBuild(iBuildNumber);         // Get the core number of the client from the build number
 
     showBanner("DBC Extractor & Map Generator", iCoreNumber);
@@ -1345,8 +1344,8 @@ int main(int argc, char** argv)
 
     printf("\n");
     printf("  Selected Options: \n");
-    printf("  Input Path: %s\n", input_path);
-    printf("  Output Path: %s\n", output_path);
+    printf("  Input Path: %s\n", input_path.c_str());
+    printf("  Output Path: %s\n", output_path.c_str());
     printf("  Extract dbc: %s\n", (CONF_extract | EXTRACT_DBC_EXTRACTORS_ALL) ? "true" : "false");
     printf("  Extract maps: %s\n", (CONF_extract | EXTRACT_MAP) ? "true" : "false");
 
@@ -1942,150 +1941,158 @@ int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath,
 
     char mpq_filename[2048];
     char output_filename[2048];
-    char mpq_map_name[2048];
+    char mpq_map_name[2048]{};
 
     // extract Maps
     //for (int i = 0; i < 1; ++i)
-    for (int i = 0; i < dataFiles.size(); ++i)
+    for (uint32 i = 0; i < dataFiles.size(); ++i)
     {
         printf("   (%03i/%03i) Extracting map Id: %04i Name: %s (%s) ADT files\n",i, (int)dataFiles.size(), (int)dataFiles[i].lookupId, dataFiles[i].fileName.c_str(), dataFiles[i].displayName.c_str());
         // Loop Through x coords
-        for (int ycoord = 0; ycoord < WDT_MAP_SIZE; ycoord++)
+        for (uint32 xcoord = 0; xcoord < WDT_MAP_SIZE; xcoord++)
         {
-            printf("   Processing...........%d%%\r", (100 * (ycoord + 1)) / WDT_MAP_SIZE);
+            printf("   Processing...........%d%%\r", (100 * (xcoord + 1)) / WDT_MAP_SIZE);
 
             // Loop Through y coords
-            for (int xcoord = 0; xcoord < WDT_MAP_SIZE; xcoord++)
+            for (uint32 ycoord = 0; ycoord < WDT_MAP_SIZE; ycoord++)
             {
-                // base _obj0.adt
-                std::string outputFilename = localPath;
-                outputFilename += dataFiles[i].fileName;
-                outputFilename += "_";
-                outputFilename += to_string(xcoord);
-                outputFilename += "_";
-                outputFilename += to_string(ycoord);
-                outputFilename += "_obj0.adt";
-
-                std::string mpqFilename = mpqFilePath;
-                mpqFilename.append(dataFiles[i].subfolderPath);
-                mpqFilename.append(dataFiles[i].fileName);
-                mpqFilename += "_";
-                mpqFilename += to_string(xcoord);
-                mpqFilename += "_";
-                mpqFilename += to_string(ycoord);
-                mpqFilename += "_obj0.adt";
-
-                if (ClientFileExists(outputFilename.c_str()))
+                //printf ("y: %02i\n", ycoord);
+                try
                 {
-                    count += 1;
-                }
-                else
-                {
+                    // base _obj0.adt
+                    std::string outputFilename = localPath;
+                    outputFilename += dataFiles[i].fileName;
+                    outputFilename += "_";
+                    outputFilename += to_string(xcoord);
+                    outputFilename += "_";
+                    outputFilename += to_string(ycoord);
+                    outputFilename += "_obj0.adt";
+
+                    std::string mpqFilename = mpqFilePath;
+                    mpqFilename.append(dataFiles[i].subfolderPath);
+                    mpqFilename.append(dataFiles[i].fileName);
+                    mpqFilename += "_";
+                    mpqFilename += to_string(xcoord);
+                    mpqFilename += "_";
+                    mpqFilename += to_string(ycoord);
+                    mpqFilename += "_obj0.adt";
+
+                    if (ClientFileExists(outputFilename.c_str()))
+                    {
+                        count += 1;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            if (ExtractFile(mpqFilename.c_str(), outputFilename.c_str(), &mpqfiles[dataFiles[i].mpqId].fileHandle))
+                            {
+                                  count += 1;
+                            }
+                        }
+                        catch (const std::exception&)
+                        {
+                            printf("   ERROR: ExtractFile failed with an exception");
+                        }
+
+                    }
+                    sprintf(mpq_filename, "adt/%s_%u_%u_obj0.adt", dataFiles[i].fileName.c_str(), xcoord, ycoord);
+                    sprintf(output_filename, "%s/maps/%04u%02u%02u.map", output_path.c_str(), dataFiles[i].lookupId, ycoord, xcoord);
+
                     try
+                    {
+                        ConvertADT(mpq_filename, output_filename);// , y, x);
+                    }
+                    catch (const std::exception&)
+                    {
+                        printf("   ERROR: ConvertADT failed with an exception");
+                    }
+
+                    // base _obj1.adt
+                    outputFilename = localPath;
+                    outputFilename += dataFiles[i].fileName;
+                    outputFilename += "_";
+                    outputFilename += to_string(xcoord);
+                    outputFilename += "_";
+                    outputFilename += to_string(ycoord);
+                    outputFilename += "_obj1.adt";
+
+                    mpqFilename = mpqFilePath;
+                    mpqFilename.append(dataFiles[i].subfolderPath);
+                    mpqFilename.append(dataFiles[i].fileName);
+                    mpqFilename += "_";
+                    mpqFilename += to_string(xcoord);
+                    mpqFilename += "_";
+                    mpqFilename += to_string(ycoord);
+                    mpqFilename += "_obj1.adt";
+
+                    if (ClientFileExists(outputFilename.c_str()))
+                    {
+                              count += 1;
+                    }
+                    else
                     {
                         if (ExtractFile(mpqFilename.c_str(), outputFilename.c_str(), &mpqfiles[dataFiles[i].mpqId].fileHandle))
                         {
                               count += 1;
                         }
                     }
-                    catch (const std::exception&)
+
+                    // base .adt
+                    outputFilename = localPath;
+                    outputFilename += dataFiles[i].fileName;
+                    outputFilename += "_";
+                    outputFilename += to_string(xcoord);
+                    outputFilename += "_";
+                    outputFilename += to_string(ycoord);
+                    outputFilename += ".adt";
+
+                    mpqFilename = mpqFilePath;
+                    mpqFilename.append(dataFiles[i].subfolderPath);
+                    mpqFilename.append(dataFiles[i].fileName);
+                    mpqFilename += "_";
+                    mpqFilename += to_string(xcoord);
+                    mpqFilename += "_";
+                    mpqFilename += to_string(ycoord);
+                    mpqFilename += ".adt";
+
+                    if (ClientFileExists(outputFilename.c_str()))
                     {
-                        printf("   ERROR: ExtractFile failed with an exception");
+                              count += 1;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            if (ExtractFile(mpqFilename.c_str(), outputFilename.c_str(), &mpqfiles[dataFiles[i].mpqId].fileHandle))
+                            {
+                                  count += 1;
+                            }
+                        }
+                        catch (const std::exception&)
+                        {
+                            printf("   ERROR: ExtractFile failed with an exception");
+                        }
+
                     }
 
-                }
-                sprintf(mpq_filename, "adt/%s_%u_%u_obj0.adt", dataFiles[i].fileName.c_str(), xcoord, ycoord);
-                sprintf(output_filename, "%s/maps/%04u%02u%02u.map", output_path, dataFiles[i].lookupId, ycoord, xcoord);
+                    sprintf(mpq_filename, "adt/%s_%u_%u.adt", dataFiles[i].fileName.c_str(), xcoord, ycoord);
+                    sprintf(output_filename, "%s/maps/%04u%02u%02u.map", output_path.c_str(), dataFiles[i].lookupId, ycoord, xcoord);
 
-                try
-                {
-                    ConvertADT(mpq_filename, output_filename);// , y, x);
-                }
-                catch (const std::exception&)
-                {
-                    printf("   ERROR: ConvertADT failed with an exception");
-                }
-
-
-                // base _obj1.adt
-                outputFilename = localPath;
-                outputFilename += dataFiles[i].fileName;
-                outputFilename += "_";
-                outputFilename += to_string(xcoord);
-                outputFilename += "_";
-                outputFilename += to_string(ycoord);
-                outputFilename += "_obj1.adt";
-
-                mpqFilename = mpqFilePath;
-                mpqFilename.append(dataFiles[i].subfolderPath);
-                mpqFilename.append(dataFiles[i].fileName);
-                mpqFilename += "_";
-                mpqFilename += to_string(xcoord);
-                mpqFilename += "_";
-                mpqFilename += to_string(ycoord);
-                mpqFilename += "_obj1.adt";
-
-                if (ClientFileExists(outputFilename.c_str()))
-                {
-                          count += 1;
-                }
-                else
-                {
-                    if (ExtractFile(mpqFilename.c_str(), outputFilename.c_str(), &mpqfiles[dataFiles[i].mpqId].fileHandle))
-                    {
-                          count += 1;
-                    }
-                }
-
-                // base .adt
-                outputFilename = localPath;
-                outputFilename += dataFiles[i].fileName;
-                outputFilename += "_";
-                outputFilename += to_string(xcoord);
-                outputFilename += "_";
-                outputFilename += to_string(ycoord);
-                outputFilename += ".adt";
-
-                mpqFilename = mpqFilePath;
-                mpqFilename.append(dataFiles[i].subfolderPath);
-                mpqFilename.append(dataFiles[i].fileName);
-                mpqFilename += "_";
-                mpqFilename += to_string(xcoord);
-                mpqFilename += "_";
-                mpqFilename += to_string(ycoord);
-                mpqFilename += ".adt";
-
-                if (ClientFileExists(outputFilename.c_str()))
-                {
-                          count += 1;
-                }
-                else
-                {
                     try
                     {
-                        if (ExtractFile(mpqFilename.c_str(), outputFilename.c_str(), &mpqfiles[dataFiles[i].mpqId].fileHandle))
-                        {
-                              count += 1;
-                        }
+                        ConvertADT(mpq_filename, output_filename);// , y, x);
                     }
                     catch (const std::exception&)
                     {
-                        printf("   ERROR: ExtractFile failed with an exception");
+                        printf("   ERROR: ConvertADT failed with an exception");
                     }
-
-                }
-
-                sprintf(mpq_filename, "adt/%s_%u_%u.adt", dataFiles[i].fileName.c_str(), xcoord, ycoord);
-                sprintf(output_filename, "%s/maps/%04u%02u%02u.map", output_path, dataFiles[i].lookupId, ycoord, xcoord);
-
-                try
-                {
-                    ConvertADT(mpq_filename, output_filename);// , y, x);
                 }
                 catch (const std::exception&)
                 {
-                    printf("   ERROR: ConvertADT failed with an exception");
+                    printf("   ERROR: ExtractADTFilesfromMPQ failed with an exception");
                 }
+
             }
         }
     }
