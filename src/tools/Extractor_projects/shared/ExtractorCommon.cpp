@@ -155,19 +155,19 @@ int getBuildNumber(std::string path)
 
             if (!memcmp(preWOTLKbuildNumber, vanillaBuild1, sizeof(preWOTLKbuildNumber))) /// build is Vanilla?
             {
-                return 5875;
+                iBuild = 5875;
             }
             else if (!memcmp(preWOTLKbuildNumber, vanillaBuild2, sizeof(preWOTLKbuildNumber))) /// build is Vanilla?
             {
-                return 6005;
+                iBuild = 6005;
             }
             else if (!memcmp(preWOTLKbuildNumber, vanillaBuild3, sizeof(preWOTLKbuildNumber))) /// build is Vanilla?
             {
-                return 6141;
+                iBuild = 6141;
             }
             else if (!memcmp(preWOTLKbuildNumber, tbcBuild, sizeof(preWOTLKbuildNumber))) /// build is TBC?
             {
-                return 8606;
+                iBuild = 8606;
             }
         }
 
@@ -179,28 +179,34 @@ int getBuildNumber(std::string path)
 
             if (!memcmp(postTBCbuildNumber, wotlkBuild, sizeof(postTBCbuildNumber))) /// build is WOTLK?
             {
-                return 12340;
+                iBuild = 12340;
             }
             else if (!memcmp(postTBCbuildNumber, cataBuild, sizeof(postTBCbuildNumber))) /// build is CATA?
             {
-                return 15595;
+                iBuild = 15595;
             }
             else if (!memcmp(postTBCbuildNumber, mopBuild, sizeof(postTBCbuildNumber))) /// build is MoP?
             {
-                return 18414;
+                iBuild = 18414;
             }
         }
     }
-
-    printf("\nFatal Error: failed to identify build version!\n\n");
-    printf("\nSupported build versions:\n");
-    printf("\nVanilla: 5875, 6005, 6141\n");
-    printf("TBC:      8606\n");
-    printf("WOTLK:    12340\n");
-    printf("CATA:     15595\n");
-    printf("MOP:      18414\n");
-    printf("\n\nExiting program!!\n");
-    exit(0);
+    if (iBuild>0)
+    {
+        return iBuild;
+    }
+    else
+    {
+        printf("\nFatal Error: failed to identify build version!\n\n");
+        printf("\nSupported build versions:\n");
+        printf("\nVanilla: 5875, 6005, 6141\n");
+        printf("TBC:      8606\n");
+        printf("WOTLK:    12340\n");
+        printf("CATA:     15595\n");
+        printf("MOP:      18414\n");
+        printf("\n\nExiting program!!\n");
+        exit(0);
+    }
 }
 
 // List of MPQ files for different WoW clients
@@ -343,33 +349,24 @@ int getCoreNumberFromBuild(int iBuildNumber)
 {
     switch (iBuildNumber)
     {
-    case 5875:  //CLASSIC
-    case 6005:  //CLASSIC
-    case 6141:  //CLASSIC
-        return CLIENT_CLASSIC;
-        break;
-    case 8606:  //TBC
-        return CLIENT_TBC;
-        break;
-    case 12340: //WOTLK
-        return CLIENT_WOTLK;
-        break;
-    case 15595: //CATA
-        return CLIENT_CATA;
-        break;
-    case 18414: //MOP
-        return CLIENT_MOP;
-        break;
-    case 21355: //WOD
-        return CLIENT_WOD;
-        break;
-    case 20740: //LEGION ALPHA
-        return CLIENT_LEGION;
-        break;
-
-    default:
-        return -1;
-        break;
+        case 5875:  //CLASSIC
+        case 6005:  //CLASSIC
+        case 6141:  //CLASSIC
+            return CLIENT_CLASSIC;
+        case 8606:  //TBC
+            return CLIENT_TBC;
+        case 12340: //WOTLK
+            return CLIENT_WOTLK;
+        case 15595: //CATA
+            return CLIENT_CATA;
+        case 18414: //MOP
+            return CLIENT_MOP;
+        case 21355: //WOD
+            return CLIENT_WOD;
+        case 20740: //LEGION ALPHA
+            return CLIENT_LEGION;
+        default:
+            return -1;
     }
 }
 
@@ -437,34 +434,26 @@ void showWebsiteBanner()
 *
 *  @PARAM iCoreNumber is the Core Number
 */
-void setMapMagicVersion(int iCoreNumber, char* magic)
+std::string setMapMagicVersion(int iCoreNumber)
 {
     switch (iCoreNumber)
     {
     case CLIENT_CLASSIC:
-        std::strcpy(magic,"z1.5");
-        break;
+        return "z1.5";
     case CLIENT_TBC:
-        std::strcpy(magic,"s1.5");
-        break;
+        return "s1.5";
     case CLIENT_WOTLK:
-        std::strcpy(magic,"v1.5");
-        break;
+        return "v1.5";
     case CLIENT_CATA:
-        std::strcpy(magic,"c1.5");
-        break;
+        return "c1.5";
     case CLIENT_MOP:
-        std::strcpy(magic,"p1.5");
-        break;
+        return "p1.5";
     case CLIENT_WOD:
-        std::strcpy(magic,"w1.5");
-        break;
+        return "w1.5";
     case CLIENT_LEGION:
-        std::strcpy(magic,"l1.5");
-        break;
+        return "l1.5";
     default:
-        std::strcpy(magic,"UNKN");
-        break;
+        return "UNKN";
     }
 }
 
@@ -473,34 +462,26 @@ void setMapMagicVersion(int iCoreNumber, char* magic)
 *
 *  @PARAM iCoreNumber is the Core Number
 */
-void setVMapMagicVersion(int iCoreNumber, std::string& magic)
+std::string setVMapMagicVersion(int iCoreNumber)
 {
     switch (iCoreNumber)
     {
-    case CLIENT_CLASSIC:
-        magic = "VMAPz07";
-        break;
-    case CLIENT_TBC:
-        magic = "VMAPs07";
-        break;
-    case CLIENT_WOTLK:
-        magic = "VMAPt07";
-        break;
-    case CLIENT_CATA:
-        magic = "VMAPc07";
-        break;
-    case CLIENT_MOP:
-        magic = "VMAPp07";
-        break;
-    case CLIENT_WOD:
-        magic = "VMAPw07";
-        break;
-    case CLIENT_LEGION:
-        magic = "VMAPl07";
-        break;
-    default:
-        magic = "VMAPUNK";
-        break;
+        case CLIENT_CLASSIC:
+            return "VMAPz07";
+        case CLIENT_TBC:
+            return "VMAPs07";
+        case CLIENT_WOTLK:
+            return "VMAPt07";
+        case CLIENT_CATA:
+            return "VMAPc07";
+        case CLIENT_MOP:
+            return "VMAPp07";
+        case CLIENT_WOD:
+            return "VMAPw07";
+        case CLIENT_LEGION:
+            return "VMAPl07";
+        default:
+            return "VMAPUNK";
     }
 }
 
@@ -509,34 +490,26 @@ void setVMapMagicVersion(int iCoreNumber, std::string& magic)
 *
 *  @PARAM iCoreNumber is the Core Number
 */
-void setMMapMagicVersion(int iCoreNumber, char* magic)
+static std::string setMMapMagicVersion(int iCoreNumber)
 {
     switch (iCoreNumber)
     {
-    case CLIENT_CLASSIC:
-        std::strcpy(magic, "z06");
-        break;
-    case CLIENT_TBC:
-        std::strcpy(magic, "s06");
-        break;
-    case CLIENT_WOTLK:
-        std::strcpy(magic, "t06");
-        break;
-    case CLIENT_CATA:
-        std::strcpy(magic, "c06");
-        break;
-    case CLIENT_MOP:
-        std::strcpy(magic, "p06");
-        break;
-    case CLIENT_WOD:
-        std::strcpy(magic, "w06");
-        break;
-    case CLIENT_LEGION:
-        std::strcpy(magic, "l06");
-        break;
-    default:
-        std::strcpy(magic, "UNK");
-        break;
+        case CLIENT_CLASSIC:
+            return "z06";
+        case CLIENT_TBC:
+            return "s06";
+        case CLIENT_WOTLK:
+            return "t06";
+        case CLIENT_CATA:
+            return "c06";
+        case CLIENT_MOP:
+            return "p06";
+        case CLIENT_WOD:
+            return "w06";
+        case CLIENT_LEGION:
+            return "l06";
+        default:
+            return "UNK";
     }
 }
 

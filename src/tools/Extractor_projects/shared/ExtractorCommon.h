@@ -64,21 +64,6 @@ void showBanner(const std::string& title, int iCoreNumber);
 /// Displays the website banner
 void showWebsiteBanner();
 
-/// Sets the map magic version for the specified core number
-void setMapMagicVersion(int iCoreNumber, char* magic);
-
-/// Sets the VMAP magic version for the specified core number
-void setVMapMagicVersion(int iCoreNumber, std::string& magic);
-
-/// Sets the MMAP magic version for the specified core number
-void setMMapMagicVersion(int iCoreNumber, char* magic);
-
-/// Creates a directory with the specified path
-bool CreateDir(const std::string& sPath);
-
-/// Checks if the client file exists
-bool ClientFileExists(const char* sFileName);
-
 /// Checks if the specified map ID is a transport map
 bool isTransportMap(int mapID);
 
@@ -95,6 +80,18 @@ typedef std::set<std::string> StringSet;
  * @return True if the file exists, false otherwise
  */
 bool FileExists(const char* file);
+
+/// Creates a directory at the specified path
+bool CreateDir(const std::string& sPath);
+
+/// Checks if the specified client file exists
+bool ClientFileExists(const char* sFileName);
+
+/// Sets the map magic version based on the core number
+std::string setMapMagicVersion(int iCoreNumber);
+
+/// Sets the VMap magic version based on the core number
+std::string setVMapMagicVersion(int iCoreNumber);
 
 /**
  * @brief Get "uniform" name for a path (a uniform name has the format <md5hash>-<filename>.<ext>)

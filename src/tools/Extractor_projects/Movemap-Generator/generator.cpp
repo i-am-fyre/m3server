@@ -361,7 +361,7 @@ int finish(const char* message, int returnValue)
 
 int main(int argc, char** argv)
 {
-    char map_magic[16];
+    std::string map_magic;
 
     char input_path[128] = ".";         /**< TODO */
     int mapnum = -1;
@@ -390,7 +390,7 @@ int main(int argc, char** argv)
     int thisBuild = getBuildNumber(input_path);
     int iCoreNumber = getCoreNumberFromBuild(thisBuild);
     showBanner("Movement Map Generator", iCoreNumber);
-    setMapMagicVersion(iCoreNumber, map_magic);
+    map_magic = setMapMagicVersion(iCoreNumber);
     showWebsiteBanner();
 
     if (mapnum == -1 && debugOutput)
@@ -414,7 +414,7 @@ int main(int argc, char** argv)
         return silent ? -3 : finish(" Press any key to close...", -3);
     }
 
-    MapBuilder builder(map_magic, maxAngle, skipLiquid, skipContinents, skipJunkMaps,
+    MapBuilder builder(map_magic.c_str(), maxAngle, skipLiquid, skipContinents, skipJunkMaps,
                        skipBattlegrounds, debugOutput, bigBaseUnit, offMeshInputPath);
 
     ACE_Time_Value elapsed;

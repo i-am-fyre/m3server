@@ -527,7 +527,7 @@ int main(int argc, char** argv)
     std::string outDir = std::string(output_path) + "/vmaps";
 
     showBanner("Vertical Map Asset Extractor", iCoreNumber);
-    setVMapMagicVersion(iCoreNumber, szRawVMAPMagic);
+    szRawVMAPMagic = setVMapMagicVersion(iCoreNumber);
     showWebsiteBanner();
 
     bool success = true;
