@@ -28,13 +28,6 @@
 #include <string>
 #include <set>
 
-/**
- * @brief
- *
- */
-typedef std::set<std::string> StringSet;
-
-
 extern char const szWorkDirWmo[]; /**< TODO */
 //extern const char* szRawVMAPMagic; /**< vmap magic string for extracted raw vmap data */
 

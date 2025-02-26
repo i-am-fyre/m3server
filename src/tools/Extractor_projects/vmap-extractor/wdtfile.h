@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef WDTFILE_H
-#define WDTFILE_H
+#ifndef VMAP_WDTFILE_H
+#define VMAP_WDTFILE_H
 
 #include <string>
 #include <mpq.h>

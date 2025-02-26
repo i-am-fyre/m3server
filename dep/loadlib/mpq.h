@@ -1,5 +1,5 @@
-#ifndef MPQ_H
-#define MPQ_H
+#ifndef VMAP_MPQ_H
+#define VMAP_MPQ_H
 
 #include "loadlib.h"
 

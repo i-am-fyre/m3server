@@ -32,6 +32,8 @@
 #include "loadlib.h"
 #include <vector>
 #include <md5.h>
+#include <list>
+#include "../vmap-extractor/adtfile.h"
 
 /// all of the updates for this version of WoW
 uint32 const Builds[] = {16016, 16048, 16057, 16309, 16357, 16516, 16650, 16844, 16965, 17116, 17266, 17325, 17345, 17538, 17645, 17688, 17898, 18273};
@@ -53,6 +55,13 @@ bool CreateDir(const std::string& sPath);
 bool ClientFileExists(const char* sFileName);
 bool isTransportMap(int mapID);
 bool shouldSkipMap(int mapID, bool m_skipContinents, bool m_skipJunkMaps, bool m_skipBattlegrounds);
+/**
+ * @brief
+ *
+ */
+typedef std::set<std::string> StringSet;
+//std::set<std::string> StringSet;
+
 /**
  * @brief Test if the specified file exists in the building directory
  *
@@ -101,4 +110,111 @@ enum ModelFlags
     MOD_WORLDSPAWN = 1 << 1,
     MOD_HAS_BOUND = 1 << 2
 };
+
+/**
+ * @brief
+ *
+ */
+typedef struct
+{
+    float x; /**< TODO */
+    float y; /**< TODO */
+    float z; /**< TODO */
+} svec;
+
+/**
+ * @brief
+ *
+ */
+typedef struct
+{
+    float v9[16 * 8 + 1][16 * 8 + 1]; /**< TODO */
+    float v8[16 * 8][16 * 8]; /**< TODO */
+} Cell;
+
+/**
+ * @brief
+ *
+ */
+typedef struct
+{
+    double v9[9][9]; /**< TODO */
+    double v8[8][8]; /**< TODO */
+    uint16 area_id; /**< TODO */
+    //Liquid *lq;
+    float waterlevel[9][9]; /**< TODO */
+    uint8 flag; /**< TODO */
+} chunk;
+
+/**
+ * @brief
+ *
+ */
+typedef struct
+{
+    chunk ch[16][16]; /**< TODO */
+} mcell;
+
+/**
+ * @brief
+ *
+ */
+struct MapChunkHeader
+{
+    uint32 flags; /**< TODO */
+    uint32 ix; /**< TODO */
+    uint32 iy; /**< TODO */
+    uint32 nLayers; /**< TODO */
+    uint32 nDoodadRefs; /**< TODO */
+    uint32 ofsHeight; /**< TODO */
+    uint32 ofsNormal; /**< TODO */
+    uint32 ofsLayer; /**< TODO */
+    uint32 ofsRefs; /**< TODO */
+    uint32 ofsAlpha; /**< TODO */
+    uint32 sizeAlpha; /**< TODO */
+    uint32 ofsShadow; /**< TODO */
+    uint32 sizeShadow; /**< TODO */
+    uint32 areaid; /**< TODO */
+    uint32 nMapObjRefs; /**< TODO */
+    uint32 holes; /**< TODO */
+    uint16 s1; /**< TODO */
+    uint16 s2; /**< TODO */
+    uint32 d1; /**< TODO */
+    uint32 d2; /**< TODO */
+    uint32 d3; /**< TODO */
+    uint32 predTex; /**< TODO */
+    uint32 nEffectDoodad; /**< TODO */
+    uint32 ofsSndEmitters; /**< TODO */
+    uint32 nSndEmitters; /**< TODO */
+    uint32 ofsLiquid; /**< TODO */
+    uint32 sizeLiquid; /**< TODO */
+    float  zpos; /**< TODO */
+    float  xpos; /**< TODO */
+    float  ypos; /**< TODO */
+    uint32 textureId; /**< TODO */
+    uint32 props; /**< TODO */
+    uint32 effectId; /**< TODO */
+};
+
+/**
+ * @brief
+ *
+ */
+struct vec
+{
+    double x; /**< TODO */
+    double y; /**< TODO */
+    double z; /**< TODO */
+};
+
+/**
+ * @brief
+ *
+ */
+struct triangle
+{
+    vec v[3]; /**< TODO */
+};
+
+
 #endif
