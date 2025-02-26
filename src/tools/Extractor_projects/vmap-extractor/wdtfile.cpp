@@ -35,7 +35,6 @@ WDTFile::WDTFile(HANDLE handle, char* file_name, char* file_name1): WDT(handle, 
         mapAreaInfo[i] = NULL;
     }
 }
-
 bool WDTFile::init(char* map_id, unsigned int mapID)
 {
     if (WDT.isEof())
@@ -108,8 +107,8 @@ bool WDTFile::init(char* map_id, unsigned int mapID)
             if (size)
             {
                 gnWMO = (int)size / 64;
-                string gWMO_mapname;
-                string fake_mapname;
+                std::string gWMO_mapname;
+                std::string fake_mapname;
                 fake_mapname = "65 65 ";
                 //gWMO_mapname = fake_mapname + filename;
                 gWMO_mapname = fake_mapname + std::string(map_id);

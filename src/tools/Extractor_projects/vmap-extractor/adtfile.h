@@ -172,7 +172,7 @@ class ADTFile
          */
         bool init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failedPaths,int iCoreNumber, const void *szRawVMAPMagic);
     private:
-        string AdtFilename; /**< TODO */
+        std::string AdtFilename; /**< TODO */
 };
 
 #endif
