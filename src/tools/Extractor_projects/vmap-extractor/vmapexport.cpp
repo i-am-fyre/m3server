@@ -127,10 +127,8 @@ void ReadLiquidTypeTableDBC()
 
 /**
  * @brief Parses the map files and processes each map.
- *
- * @param localSzRawVMAPMagic The magic string for raw VMAP files.
  */
-static void ParseMapFiles(std::string localSzRawVMAPMagic)
+static void ParseMapFiles()
 {
     char* fn = new char[512];
     char* id = new char[10];
@@ -158,7 +156,7 @@ static void ParseMapFiles(std::string localSzRawVMAPMagic)
                 {
                     if (ADTFile* ADT = WDT.GetMap(x, y))
                     {
-                        ADT->init(map_ids[i].id, x, y, failedPaths, iCoreNumber, localSzRawVMAPMagic, preciseVectorData, szWorkDirWmo);
+                        ADT->init(map_ids[i].id, x, y, failedPaths, iCoreNumber, szRawVMAPMagic, preciseVectorData, szWorkDirWmo);
                         delete ADT;
                     }
                 }

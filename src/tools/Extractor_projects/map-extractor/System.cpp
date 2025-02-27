@@ -98,6 +98,7 @@ std::vector<dataFile> DBCFiles;
 std::vector<dataFile> DB2Files;
 std::vector<dataFile> WDTFiles;
 std::vector<dataFile> ADTFiles;
+std::vector<dataFile> FinalMPQList;
 std::string outDir = std::string(output_path) + "/vmaps";
 
 /**
@@ -232,52 +233,45 @@ float liquid_height[ADT_GRID_SIZE + 1][ADT_GRID_SIZE + 1];      /**< TODO */
  * @param mpqPath Path within the MPQ archive.
  * @param fileMask File mask to filter files.
  * @param localPath Local directory to save the extracted files.
- * @param mpqfiles Vector of dataFile structures representing the MPQ files.
  * @param trimLength Flag to indicate if the path should be trimmed.
  * @return int Number of files extracted.
  */
-int ExtractFilefromMPQ(std::vector<dataFile>& dbcFiles, const char * mpqPath,string fileMask,string localPath, std::vector<dataFile> mpqfiles, bool trimLength);
+int ExtractFilefromMPQ(std::vector<dataFile>& dbcFiles, const char * mpqPath,string fileMask,string localPath, bool trimLength);
 
 /**
  * @brief Appends a list of files to a vector based on a file mask.
  *
- * @param mpqFiles Vector of dataFile structures representing the MPQ files.
  * @param filelist Vector to append the file list to.
  * @param fileMask File mask to filter files.
  */
-void AppendFileListTo(std::vector<dataFile> mpqFiles, std::vector<dataFile>& filelist, const char* fileMask);
+void AppendFileListTo(std::vector<dataFile>& fileList, const char* fileMask);
 
 /**
  * @brief Reads DBC files from an MPQ archive.
  *
- * @param mpqFiles Vector of dataFile structures representing the MPQ files.
  * @param fileName Name of the DBC file to read.
  * @param mapList Vector to store the read data.
  * @param dbcType Type of DBC file.
  */
-void NewReadDbcFromMPQ(std::vector<dataFile> mpqFiles, const char* fileName, std::vector<dataFile>& mapList, int dbcType);
+void NewReadDbcFromMPQ(const char* fileName, std::vector<dataFile>& mapList, int dbcType);
 
 /**
  * @brief Extracts WDT files from an MPQ archive.
  *
- * @param dataFiles Vector of dataFile structures representing the WDT files.
  * @param mpqFilePath Path within the MPQ archive.
  * @param localPath Local directory to save the extracted files.
- * @param mpqfiles Vector of dataFile structures representing the MPQ files.
  * @return int Number of files extracted.
  */
-int ExtractWDTFilefromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath, string localPath, std::vector<dataFile> mpqfiles);
+int ExtractWDTFilefromMPQ(string mpqFilePath, string localPath);
 
 /**
  * @brief Extracts ADT files from an MPQ archive.
  *
- * @param dataFiles Vector of dataFile structures representing the ADT files.
  * @param mpqFilePath Path within the MPQ archive.
  * @param localPath Local directory to save the extracted files.
- * @param mpqfiles Vector of dataFile structures representing the MPQ files.
  * @return int Number of files extracted.
  */
-int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath, string localPath, std::vector<dataFile> mpqfiles);
+int ExtractADTFilesfromMPQ(string mpqFilePath, string localPath);
 
 int ReturnAreaListId(int lookupId);
 
@@ -1355,39 +1349,38 @@ bool ConvertADT(char* adt_filename, char* output_filename)
 /// (e.g., "*.dbc") and appends the found files to a provided list.
 /// It handles the extraction of file metadata and ensures that the files are correctly categorized based on their subfolder status.
 /// </summary>
-/// <param name="mpqFiles">A list of MPQ files and file handles</param>
 /// <param name="fileList">A list of filenames which is populated from the searched files</param>
 /// <param name="fileMask">The filemask of the files to be found</param>
-void AppendFileListTo(std::vector<dataFile> mpqFiles, std::vector<dataFile>& fileList, const char* fileMask)
+void AppendFileListTo(std::vector<dataFile>& fileList, const char* fileMask)
 {
     SFILE_FIND_DATA findFileData;
     int counter =0;
-    for (int i = 0; i < mpqFiles.size(); ++i)
+    for (int i = 0; i < FinalMPQList.size(); ++i)
     {
         try
         {
-            HANDLE searchHandle = SFileFindFirstFile(mpqFiles[i].fileHandle, fileMask, &findFileData, NULL);
+            HANDLE searchHandle = SFileFindFirstFile(FinalMPQList[i].fileHandle, fileMask, &findFileData, NULL);
             if (searchHandle)
             {
                 dataFile thisFile{};
                 thisFile.fileName = findFileData.cFileName;
-                thisFile.parentFilename = mpqFiles[counter].fileName.c_str();
+                thisFile.parentFilename = FinalMPQList[counter].fileName.c_str();
                 thisFile.subfolderPath = "";
                 thisFile.inSubfolder = false;
-                thisFile.mpqId = mpqFiles[i].lookupId;
-                if (mpqFiles[counter].inSubfolder)
+                thisFile.mpqId = FinalMPQList[i].lookupId;
+                if (FinalMPQList[counter].inSubfolder)
                 {
-                    thisFile.subfolderPath = mpqFiles[counter].subfolderPath.c_str();
+                    thisFile.subfolderPath = FinalMPQList[counter].subfolderPath.c_str();
                     thisFile.inSubfolder = true;
                 }
 
                 if (!debugLog)
                 {
-                    printf("   Adding: %s  from: %s\n", thisFile.fileName.c_str(), mpqFiles[counter].fileName.c_str());
+                    printf("   Adding: %s  from: %s\n", thisFile.fileName.c_str(), FinalMPQList[counter].fileName.c_str());
                 }
                 else
                 {
-                    printf("   Adding: %s  subfolder: %s  from: %s  MPQ: %s\n", thisFile.fileName.c_str(), thisFile.subfolderPath.c_str(), mpqFiles[counter].parentFilename.c_str(), mpqFiles[counter].fileName.c_str());
+                    printf("   Adding: %s  subfolder: %s  from: %s  MPQ: %s\n", thisFile.fileName.c_str(), thisFile.subfolderPath.c_str(), FinalMPQList[counter].parentFilename.c_str(), FinalMPQList[counter].fileName.c_str());
                 }
 
                 fileList.push_back(thisFile);
@@ -1395,22 +1388,22 @@ void AppendFileListTo(std::vector<dataFile> mpqFiles, std::vector<dataFile>& fil
                 {
                     dataFile thisFile{};
                     thisFile.fileName = findFileData.cFileName;
-                    thisFile.parentFilename = mpqFiles[counter].fileName.c_str();
+                    thisFile.parentFilename = FinalMPQList[counter].fileName.c_str();
                     thisFile.subfolderPath = "";
                     thisFile.inSubfolder = false;
-                    thisFile.mpqId = mpqFiles[i].lookupId;
-                    if (mpqFiles[counter].inSubfolder)
+                    thisFile.mpqId = FinalMPQList[i].lookupId;
+                    if (FinalMPQList[counter].inSubfolder)
                     {
-                        thisFile.subfolderPath = mpqFiles[counter].subfolderPath.c_str();
+                        thisFile.subfolderPath = FinalMPQList[counter].subfolderPath.c_str();
                         thisFile.inSubfolder = true;
                     }
                     if (!debugLog)
                     {
-                        printf("   Adding: %s  from: %s\n", thisFile.fileName.c_str(), mpqFiles[counter].fileName.c_str());
+                        printf("   Adding: %s  from: %s\n", thisFile.fileName.c_str(), FinalMPQList[counter].fileName.c_str());
                     }
                     else
                     {
-                        printf("   Adding: %s  subfolder: %s  from: %s  MPQ: %s\n", thisFile.fileName.c_str(), thisFile.subfolderPath.c_str(), mpqFiles[counter].parentFilename.c_str(), mpqFiles[counter].fileName.c_str());
+                        printf("   Adding: %s  subfolder: %s  from: %s  MPQ: %s\n", thisFile.fileName.c_str(), thisFile.subfolderPath.c_str(), FinalMPQList[counter].parentFilename.c_str(), FinalMPQList[counter].fileName.c_str());
                     }
                     fileList.push_back(thisFile);
                 }
@@ -1434,10 +1427,9 @@ void AppendFileListTo(std::vector<dataFile> mpqFiles, std::vector<dataFile>& fil
 /// <param name="mpqPath">A string representing the path within the MPQ archive where the files are located.</param>
 /// <param name="fileMask">A string representing the file mask (e.g., "*.dbc") used to filter the files to be extracted.</param>
 /// <param name="localPath">A string representing the local directory where the extracted files will be saved.</param>
-/// <param name="mpqFiles">A vector of dataFile structures representing a list of MPQ files.</param>
 /// <param name="trimLength">DBC files required the path being trimmed, this flag sets that.</param>
 /// <returns></returns>
-int ExtractFilefromMPQ(std::vector<dataFile>& dbcFiles, const char * mpqPath,string fileMask,string localPath, std::vector<dataFile> mpqfiles, bool trimLength)
+int ExtractFilefromMPQ(std::vector<dataFile>& dbcFiles, const char * mpqPath,string fileMask,string localPath, bool trimLength)
 {
     if (debugLog)
     {
@@ -1479,7 +1471,7 @@ int ExtractFilefromMPQ(std::vector<dataFile>& dbcFiles, const char * mpqPath,str
         {
              //for (int z = 0; z < mpqfiles.size(); ++z)
              //{
-                if (ExtractFile(dbcFiles[i].fileName.c_str(), filename, &mpqfiles[dbcFiles[i].mpqId].fileHandle))
+                if (ExtractFile(dbcFiles[i].fileName.c_str(), filename, FinalMPQList[dbcFiles[i].mpqId].fileHandle))
                 {
                     if (debugLog)
                     {
@@ -1497,12 +1489,10 @@ int ExtractFilefromMPQ(std::vector<dataFile>& dbcFiles, const char * mpqPath,str
 /// The ExtractWDTFilefromMPQ function is responsible for extracting WDT (World Data Table) files
 /// from MPQ archives and saving them to a specified local directory.
 /// </summary>
-/// <param name="dataFiles">A reference to a vector of dataFile structures representing the WDT files to be extracted.</param>
 /// <param name="mpqFilePath">The path within the MPQ archive where the WDT files are located.</param>
 /// <param name="localPath">The local directory where the extracted WDT files will be saved.</param>
-/// <param name="mpqfiles">A vector of dataFile structures representing the MPQ files.</param>
 /// <returns>int<returns>The number of WDT files successfully extracted.
-int ExtractWDTFilefromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath, string localPath, std::vector<dataFile> mpqfiles)
+int ExtractWDTFilefromMPQ(string mpqFilePath, string localPath)
 {
     bool fileFound = false;
     int count =0;
@@ -1513,15 +1503,15 @@ int ExtractWDTFilefromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath, 
     CreateDir(localPath);
 
     // extract DBCs
-    for (int i = 0; i < dataFiles.size(); ++i)
+    for (int i = 0; i < WDTFiles.size(); ++i)
     {
         std::string outputFilename = localPath;
 
-        outputFilename += dataFiles[i].fileName;
+        outputFilename += WDTFiles[i].fileName;
 
         std::string mpqFilename = mpqFilePath;
-        mpqFilename.append(dataFiles[i].subfolderPath);
-        mpqFilename.append(dataFiles[i].fileName);
+        mpqFilename.append(WDTFiles[i].subfolderPath);
+        mpqFilename.append(WDTFiles[i].fileName);
 
         if (ClientFileExists(outputFilename.c_str()))
         {
@@ -1529,7 +1519,7 @@ int ExtractWDTFilefromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath, 
         }
         else
         {
-            if (ExtractFile(mpqFilename.c_str(), outputFilename.c_str(), &mpqfiles[dataFiles[i].mpqId].fileHandle))
+            if (ExtractFile(mpqFilename.c_str(), outputFilename.c_str(), FinalMPQList[WDTFiles[i].mpqId].fileHandle))
             {
                 fileFound = true;
             }
@@ -1543,7 +1533,14 @@ int ExtractWDTFilefromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath, 
     return count;
 }
 
-int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath, string localPath, std::vector<dataFile> mpqfiles)
+/**
+ * @brief Extracts ADT files from an MPQ archive.
+ *
+ * @param mpqFilePath Path within the MPQ archive.
+ * @param localPath Local directory to save the extracted files.
+ * @return int Number of files extracted.
+ */
+int ExtractADTFilesfromMPQ(string mpqFilePath, string localPath)
 {
     bool fileFound = false;
     int count =0;
@@ -1559,9 +1556,9 @@ int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath,
 
     // extract Maps
     //for (int i = 0; i < 1; ++i)
-    for (uint32 i = 0; i < dataFiles.size(); ++i)
+    for (uint32 i = 0; i < ADTFiles.size(); ++i)
     {
-        printf("   (%03i/%03i) Extracting map Id: %04i Name: %s (%s) ADT files\n",i, (int)dataFiles.size(), (int)dataFiles[i].lookupId, dataFiles[i].fileName.c_str(), dataFiles[i].displayName.c_str());
+        printf("   (%03i/%03i) Extracting map Id: %04i Name: %s (%s) ADT files\n",i, (int)ADTFiles.size(), (int)ADTFiles[i].lookupId, ADTFiles[i].fileName.c_str(), ADTFiles[i].displayName.c_str());
         // Loop Through x coords
         for (uint32 xcoord = 0; xcoord < WDT_MAP_SIZE; xcoord++)
         {
@@ -1575,7 +1572,7 @@ int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath,
                 {
                     // base _obj0.adt
                     std::string outputFilename = localPath;
-                    outputFilename += dataFiles[i].fileName;
+                    outputFilename += ADTFiles[i].fileName;
                     outputFilename += "_";
                     outputFilename += to_string(xcoord);
                     outputFilename += "_";
@@ -1583,8 +1580,8 @@ int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath,
                     outputFilename += "_obj0.adt";
 
                     std::string mpqFilename = mpqFilePath;
-                    mpqFilename.append(dataFiles[i].subfolderPath);
-                    mpqFilename.append(dataFiles[i].fileName);
+                    mpqFilename.append(ADTFiles[i].subfolderPath);
+                    mpqFilename.append(ADTFiles[i].fileName);
                     mpqFilename += "_";
                     mpqFilename += to_string(xcoord);
                     mpqFilename += "_";
@@ -1599,7 +1596,7 @@ int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath,
                     {
                         try
                         {
-                            if (ExtractFile(mpqFilename.c_str(), outputFilename.c_str(), &mpqfiles[dataFiles[i].mpqId].fileHandle))
+                            if (ExtractFile(mpqFilename.c_str(), outputFilename.c_str(), FinalMPQList[ADTFiles[i].mpqId].fileHandle))
                             {
                                   count += 1;
                             }
@@ -1610,8 +1607,8 @@ int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath,
                         }
 
                     }
-                    sprintf(mpq_filename, "adt/%s_%u_%u_obj0.adt", dataFiles[i].fileName.c_str(), xcoord, ycoord);
-                    sprintf(output_filename, "%s/maps/%04u%02u%02u.map", output_path.c_str(), dataFiles[i].lookupId, ycoord, xcoord);
+                    sprintf(mpq_filename, "adt/%s_%u_%u_obj0.adt", ADTFiles[i].fileName.c_str(), xcoord, ycoord);
+                    sprintf(output_filename, "%s/maps/%04u%02u%02u.map", output_path.c_str(), ADTFiles[i].lookupId, ycoord, xcoord);
 
                     try
                     {
@@ -1624,7 +1621,7 @@ int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath,
 
                     // base _obj1.adt
                     outputFilename = localPath;
-                    outputFilename += dataFiles[i].fileName;
+                    outputFilename += ADTFiles[i].fileName;
                     outputFilename += "_";
                     outputFilename += to_string(xcoord);
                     outputFilename += "_";
@@ -1632,8 +1629,8 @@ int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath,
                     outputFilename += "_obj1.adt";
 
                     mpqFilename = mpqFilePath;
-                    mpqFilename.append(dataFiles[i].subfolderPath);
-                    mpqFilename.append(dataFiles[i].fileName);
+                    mpqFilename.append(ADTFiles[i].subfolderPath);
+                    mpqFilename.append(ADTFiles[i].fileName);
                     mpqFilename += "_";
                     mpqFilename += to_string(xcoord);
                     mpqFilename += "_";
@@ -1646,7 +1643,7 @@ int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath,
                     }
                     else
                     {
-                        if (ExtractFile(mpqFilename.c_str(), outputFilename.c_str(), &mpqfiles[dataFiles[i].mpqId].fileHandle))
+                        if (ExtractFile(mpqFilename.c_str(), outputFilename.c_str(), FinalMPQList[ADTFiles[i].mpqId].fileHandle))
                         {
                               count += 1;
                         }
@@ -1654,7 +1651,7 @@ int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath,
 
                     // base .adt
                     outputFilename = localPath;
-                    outputFilename += dataFiles[i].fileName;
+                    outputFilename += ADTFiles[i].fileName;
                     outputFilename += "_";
                     outputFilename += to_string(xcoord);
                     outputFilename += "_";
@@ -1662,8 +1659,8 @@ int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath,
                     outputFilename += ".adt";
 
                     mpqFilename = mpqFilePath;
-                    mpqFilename.append(dataFiles[i].subfolderPath);
-                    mpqFilename.append(dataFiles[i].fileName);
+                    mpqFilename.append(ADTFiles[i].subfolderPath);
+                    mpqFilename.append(ADTFiles[i].fileName);
                     mpqFilename += "_";
                     mpqFilename += to_string(xcoord);
                     mpqFilename += "_";
@@ -1678,7 +1675,7 @@ int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath,
                     {
                         try
                         {
-                            if (ExtractFile(mpqFilename.c_str(), outputFilename.c_str(), &mpqfiles[dataFiles[i].mpqId].fileHandle))
+                            if (ExtractFile(mpqFilename.c_str(), outputFilename.c_str(), FinalMPQList[ADTFiles[i].mpqId].fileHandle))
                             {
                                   count += 1;
                             }
@@ -1690,8 +1687,8 @@ int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath,
 
                     }
 
-                    sprintf(mpq_filename, "adt/%s_%u_%u.adt", dataFiles[i].fileName.c_str(), xcoord, ycoord);
-                    sprintf(output_filename, "%s/maps/%04u%02u%02u.map", output_path.c_str(), dataFiles[i].lookupId, ycoord, xcoord);
+                    sprintf(mpq_filename, "adt/%s_%u_%u.adt", ADTFiles[i].fileName.c_str(), xcoord, ycoord);
+                    sprintf(output_filename, "%s/maps/%04u%02u%02u.map", output_path.c_str(), ADTFiles[i].lookupId, ycoord, xcoord);
 
                     try
                     {
@@ -1762,14 +1759,21 @@ int ExtractADTFilesfromMPQ(std::vector<dataFile>& dataFiles, string mpqFilePath,
 //    }
 //}
 
-void NewReadDbcFromMPQ(std::vector<dataFile> mpqFiles, const char* fileName, std::vector<dataFile>& mapList, int dbcType)
+/**
+ * @brief Reads DBC files from an MPQ archive.
+ *
+ * @param fileName Name of the DBC file to read.
+ * @param mapList Vector to store the read data.
+ * @param dbcType Type of DBC file.
+ */
+void NewReadDbcFromMPQ(const char* fileName, std::vector<dataFile>& mapList, int dbcType)
 {
     SFILE_FIND_DATA findFileData;
-    for (int i = 0; i < mpqFiles.size(); ++i)
+    for (int i = 0; i < FinalMPQList.size(); ++i)
     {
         try
         {
-            HANDLE searchHandle = SFileFindFirstFile(mpqFiles[i].fileHandle, fileName, &findFileData, NULL);
+            HANDLE searchHandle = SFileFindFirstFile(FinalMPQList[i].fileHandle, fileName, &findFileData, NULL);
             if (searchHandle)
             {
                 HANDLE dbcFile;
@@ -1801,7 +1805,7 @@ void NewReadDbcFromMPQ(std::vector<dataFile> mpqFiles, const char* fileName, std
                         {
                             case 1: // Maps.dbc
                                 dbc_record.lookupId = dbc.getRecord(x).getUInt(0);      // Map Id
-                                dbc_record.mpqId = mpqFiles[i].lookupId;                // MPQ Id that the dbc is in
+                                dbc_record.mpqId = FinalMPQList[i].lookupId;                // MPQ Id that the dbc is in
                                 dbc_record.fileName = dbc.getRecord(x).getString(1);    // Map Folder Name
                                 tempString = dbc.getRecord(x).getString(5);
                                 if (tempString.length() == 0)
@@ -1843,14 +1847,14 @@ void NewReadDbcFromMPQ(std::vector<dataFile> mpqFiles, const char* fileName, std
                                 }
                                 dbc_record.lookupId = dbc.getRecord(x).getUInt(idField);       // Area Id
                                 dbc_record.uint16Value = dbc.getRecord(x).getUInt(valueField); // Area Bit
-                                dbc_record.mpqId = mpqFiles[i].lookupId;                       // MPQ Id that the dbc is in
+                                dbc_record.mpqId = FinalMPQList[i].lookupId;                       // MPQ Id that the dbc is in
                                 dbc_record.fileName = dbc.getRecord(x).getString(nameField);   // Area Name
 
                                 break;
                             case 3: // LiquidType.dbc
                                 dbc_record.lookupId = dbc.getRecord(x).getUInt(0);                       // Liquid Id
                                 dbc_record.uint16Value = dbc.getRecord(x).getUInt(3);                    // Base Liquid Type Id
-                                dbc_record.mpqId = mpqFiles[i].lookupId;                                 // MPQ Id that the dbc is in
+                                dbc_record.mpqId = FinalMPQList[i].lookupId;                                 // MPQ Id that the dbc is in
                                 dbc_record.fileName = dbc.getRecord(x).getString(1);                     // Liquid Name
                                 dbc_record.displayName = LiquidTypeList[dbc_record.uint16Value].c_str(); // Base Liquid Name
                                 break;
@@ -1878,10 +1882,8 @@ void NewReadDbcFromMPQ(std::vector<dataFile> mpqFiles, const char* fileName, std
 
 /**
  * @brief Parses the map files and processes each map.
- *
- * @param localSzRawVMAPMagic The magic string for raw VMAP files.
  */
-static void ParseMapFiles(std::string localSzRawVMAPMagic)
+static void ParseMapFiles()
 {
     char* fn = new char[512];
     char* id = new char[10];
@@ -1893,11 +1895,12 @@ static void ParseMapFiles(std::string localSzRawVMAPMagic)
         sprintf(fn, "World\\Maps\\%s\\%s.wdt", MapList[i].fileName.c_str(), MapList[i].fileName.c_str());
 
         HANDLE handleWDT;
-        if (!OpenNewestFile(fn, &handleWDT))
-        {
-            printf("Error opening WDT file %s\n", fn);
-            continue;
-        }
+        //if (!OpenNewestFile(fn, &handleWDT))
+        //{
+        //    printf("Error opening WDT file %s\n", fn);
+        //    continue;
+        //}
+        //handleWDT = WDTFiles[i].fileHandle;
 
         ////thisWDTFile.loadFileFromDisk(WDTFiles[i].fileName);
         ////WDTFile WDT(handleWDT, fn, MapList[i].fileName.c_str());
@@ -2201,7 +2204,6 @@ int main(int argc, char** argv)
 
     // Stage 2: Create a list of MPQ's needed for this core
     std::vector<std::string> MPQList = getMPQListForCore(iCoreNumber);
-    std::vector<dataFile> FinalMPQList;
 
     if (MPQList.empty())
     {
@@ -2303,13 +2305,13 @@ int main(int argc, char** argv)
     printf(" Stage 3: Extract the DBC / DB2 files from the MPq's\n");
     printf(" ===================================================\n");
 
-    AppendFileListTo(FinalMPQList, DBCFiles, "*.dbc");
+    AppendFileListTo(DBCFiles, "*.dbc");
     const char* mpqPath = "DBFilesClient\\";
-    DBCDB2Count = ExtractFilefromMPQ(DBCFiles,mpqPath, "*.dbc","dbc/", FinalMPQList,true);
+    DBCDB2Count = ExtractFilefromMPQ(DBCFiles,mpqPath, "*.dbc","dbc/", true);
 
-    AppendFileListTo(FinalMPQList, DB2Files, "*.db2");
+    AppendFileListTo(DB2Files, "*.db2");
     mpqPath = "DBFilesClient\\";
-    DBCDB2Count += ExtractFilefromMPQ(DB2Files, mpqPath, "*.db2","dbc/", FinalMPQList,true);
+    DBCDB2Count += ExtractFilefromMPQ(DB2Files, mpqPath, "*.db2","dbc/", true);
 
     printf("\n");
     printf("  Summary: Detected %i DBC and %i DB2 Files: \n", (int)DBCFiles.size(), (int)DB2Files.size());
@@ -2318,7 +2320,7 @@ int main(int argc, char** argv)
     printf(" Stage 4: Open dbc's needed by the extractor\n");
     printf(" ===========================================\n");
 
-    NewReadDbcFromMPQ(FinalMPQList, "DBFilesClient\\Map.dbc",MapList, 1);
+    NewReadDbcFromMPQ("DBFilesClient\\Map.dbc",MapList, 1);
     //ReadMapDBC("dbc/");
 
     // Prepare the LiquidTypeList lookup
@@ -2327,9 +2329,9 @@ int main(int argc, char** argv)
     LiquidTypeList.push_back("Magma");
     LiquidTypeList.push_back("Slime");
 
-    NewReadDbcFromMPQ(FinalMPQList, "DBFilesClient\\LiquidType.dbc",LiquidList, 3);
+    NewReadDbcFromMPQ("DBFilesClient\\LiquidType.dbc",LiquidList, 3);
 
-    NewReadDbcFromMPQ(FinalMPQList, "DBFilesClient\\AreaTable.dbc",AreaList, 2);
+    NewReadDbcFromMPQ("DBFilesClient\\AreaTable.dbc",AreaList, 2);
 
     printf("\n");
     printf("  Summary: Maps: %i, Areas: %i, Liquids: %i Loaded: \n", (int)MapList.size(), (int)AreaList.size(), (int)LiquidList.size());
@@ -2369,7 +2371,7 @@ int main(int argc, char** argv)
     for (int i = 0; i < WDTFiles.size(); ++i)
     {
         printf("   (%03i/%03i)  Extracting: %04i  Name: %s\n", i+1, (int)WDTFiles.size(), (int)WDTFiles[i].lookupId, WDTFiles[i].fileName.c_str());
-        WDTCount += ExtractWDTFilefromMPQ(WDTFiles, "world\\maps\\", "wdt/", FinalMPQList);
+        WDTCount += ExtractWDTFilefromMPQ("world\\maps\\", "wdt/");
     }
 
     printf("\n");
@@ -2379,7 +2381,7 @@ int main(int argc, char** argv)
     printf("\n");
     printf(" Stage 5: Extract ADT files needed by the extractor and create .map files\n");
     printf(" ========================================================================\n");
-    ADTCount += ExtractADTFilesfromMPQ(ADTFiles, "world\\maps\\", "adt/", FinalMPQList);
+    ADTCount += ExtractADTFilesfromMPQ("world\\maps\\", "adt/");
 
     printf("\n\n");
     printf("   Summary: Processed %i ADT Files from %i maps\n", ADTCount, (int)ADTFiles.size());
@@ -2399,7 +2401,7 @@ int main(int argc, char** argv)
         printf(" Your %s directory seems to exist, please delete it!\n", szWorkDirWmo.c_str());
         dirty = true;
     }
-    
+
     if (!stat(outDir.c_str(), &status))
     {
         printf(" Your %s directory seems to exist, please delete it!\n", outDir.c_str());
@@ -2432,7 +2434,7 @@ int main(int argc, char** argv)
     //Stage 12: Create VMap files
 
 
-
+    // Clean up, close down and release all the mpq handles we had stored
     CloseArchives();
     for (int i = 0; i < FinalMPQList.size(); ++i)
     {
